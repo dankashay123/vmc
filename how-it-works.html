@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>How It Works — Void Matrix</title>
+<meta name="description" content="A plain-language explanation of the Void Matrix cipher — grids, coordinates, shifts, and transposition.">
+<meta name="theme-color" content="#010103">
+<link rel="stylesheet" href="style.css">
+<style>
+.section{margin-bottom:64px;}
+.section-num{
+  font-size:9px;letter-spacing:4px;color:var(--t1);margin-bottom:8px;
+}
+.section-num::before{content:'0';}
+.section-title{
+  font-family:'VT323',monospace;font-size:clamp(28px,4vw,48px);
+  letter-spacing:3px;color:var(--t3);margin-bottom:16px;
+}
+.section-body{
+  font-size:11px;color:var(--t2);letter-spacing:1px;line-height:2.1;
+  max-width:660px;
+}
+.section-body p{margin-bottom:16px;}
+.section-body p:last-child{margin-bottom:0;}
+
+/* Grid diagram */
+.grid-diagram{
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  letter-spacing:3px;line-height:2.2;
+  border:1px solid var(--bd1);
+  padding:20px 24px;
+  background:var(--win);
+  display:inline-block;
+  margin:24px 0;
+  position:relative;
+}
+.grid-diagram::before{
+  content:attr(data-label);
+  position:absolute;top:-9px;left:12px;
+  font-size:7px;letter-spacing:2px;color:var(--t1);
+  background:var(--void);padding:0 6px;
+}
+.grid-diagram .coord{color:var(--t1);font-size:10px;}
+.grid-diagram .hl{color:var(--acc);text-shadow:0 0 6px var(--accg);}
+.grid-diagram .dim{color:var(--t1);}
+
+/* Step block */
+.step{
+  display:flex;gap:20px;margin-bottom:40px;
+  align-items:flex-start;
+}
+.step-num{
+  font-family:'VT323',monospace;font-size:48px;color:var(--bd2);
+  line-height:1;flex-shrink:0;width:48px;text-align:right;
+  padding-top:2px;
+}
+.step-content{flex:1;}
+.step-title{
+  font-family:'VT323',monospace;font-size:22px;letter-spacing:2px;
+  color:var(--t3);margin-bottom:8px;
+}
+.step-body{font-size:11px;color:var(--t2);letter-spacing:1px;line-height:2;}
+
+/* Code / example block */
+.example{
+  background:var(--panel);border:1px solid var(--bd1);border-left:2px solid var(--acc);
+  padding:14px 18px;margin:16px 0;
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:var(--t2);letter-spacing:1px;line-height:2;
+}
+.example .lbl{color:var(--t1);font-size:8px;letter-spacing:2px;display:block;margin-bottom:4px;}
+.example .val{color:var(--acc);}
+.example .arr{color:var(--t1);}
+
+/* Keys explainer */
+.keys-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--bd0);margin:24px 0;
+}
+@media(max-width:600px){.keys-grid{grid-template-columns:1fr;}}
+.key-card{
+  background:var(--panel);padding:20px;
+}
+.key-card-name{
+  font-size:8px;letter-spacing:3px;color:var(--t1);margin-bottom:6px;
+}
+.key-card-title{
+  font-family:'VT323',monospace;font-size:20px;letter-spacing:2px;
+  color:var(--acc);margin-bottom:8px;
+}
+.key-card-body{font-size:9px;color:var(--t1);letter-spacing:1px;line-height:1.9;}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--bd0);padding:20px 0;}
+.faq-q{
+  font-family:'VT323',monospace;font-size:18px;letter-spacing:2px;
+  color:var(--t3);margin-bottom:8px;
+}
+.faq-q::before{content:'Q: ';color:var(--acc);}
+.faq-a{font-size:10px;color:var(--t1);letter-spacing:1px;line-height:2;}
+.faq-a::before{content:'A: ';color:var(--t2);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">VOID MATRIX</a>
+  <button class="nav-menu-btn" onclick="toggleNav()">☰ MENU</button>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html" class="nav-link">HOME</a>
+    <a href="how-it-works.html" class="nav-link active">HOW IT WORKS</a>
+    <a href="about.html" class="nav-link">ABOUT</a>
+    <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-eyebrow">DOCUMENTATION</div>
+  <h1 class="page-title">How It <span>Works</span></h1>
+  <p class="page-lead">
+    A plain-language breakdown of the cipher — no math degree required.
+  </p>
+
+  <hr class="divider" data-label="THE BASICS">
+
+  <!-- THE GRID -->
+  <div class="section">
+    <div class="section-num">1 — THE GRID</div>
+    <div class="section-title">The 6×6 Matrix</div>
+    <div class="section-body">
+      <p>The foundation of Void Matrix is a 6-by-6 grid containing all 26 letters of the alphabet (A–Z, with I and J treated as distinct characters) plus the 10 digits 0–9. That's exactly 36 characters filling 36 squares.</p>
+      <p>Every character in the grid has a unique address — a row number and a column number. To encrypt the letter S, you find it in the grid and note its coordinates. That coordinate pair becomes the basis for everything else.</p>
+    </div>
+
+    <div class="grid-diagram" data-label="DEFAULT MATRIX (Grid Key: OBSCURE)">
+<span class="coord">     1   2   3   4   5   6</span>
+<span class="coord">1 </span>  O   B  <span class="hl"> S </span>  C   U   R
+<span class="coord">2 </span>  E   A   D   F   G   H
+<span class="coord">3 </span>  I   J   K   L   M   N
+<span class="coord">4 </span>  P   Q   T   V   W   X
+<span class="coord">5 </span>  Y   Z   0   1   2   3
+<span class="coord">6 </span>  4   5   6   7   8   9</div>
+
+    <div class="section-body">
+      <p>In this grid, the letter <span style="color:var(--acc)">S</span> is at Row 1, Column 3. The letter E is at Row 2, Column 1. Every character has exactly one address, and every address holds exactly one character.</p>
+    </div>
+  </div>
+
+  <hr class="divider" data-label="THE THREE KEYS">
+
+  <!-- THREE KEYS -->
+  <div class="section">
+    <div class="section-num">2 — THE KEYS</div>
+    <div class="section-title">Three Keys, Three Jobs</div>
+    <div class="section-body">
+      <p>The cipher uses three independent keys. Each one does a different job. All three are required to decrypt.</p>
+    </div>
+    <div class="keys-grid">
+      <div class="key-card">
+        <div class="key-card-name">KEY 01</div>
+        <div class="key-card-title">GRID KEY</div>
+        <div class="key-card-body">Shuffles the layout of the entire matrix. A word like OBSCURE pushes its letters to the front of the grid, displacing everything else. Change this key and the whole grid rearranges — the same message encrypts completely differently.</div>
+      </div>
+      <div class="key-card">
+        <div class="key-card-name">KEY 02</div>
+        <div class="key-card-title">TRANSPOSITION KEY</div>
+        <div class="key-card-body">Scrambles the order of coordinates after they've been extracted. The coordinates are written in columns under the key's letters, then read back in alphabetical order. Longer keys scramble more aggressively.</div>
+      </div>
+      <div class="key-card">
+        <div class="key-card-name">KEY 03</div>
+        <div class="key-card-title">SHIFT SEQUENCE</div>
+        <div class="key-card-body">A string of digits (1–9) that shifts each coordinate by a cycling amount before transposition. The shift pattern cycles through the digits repeatedly, so every position in the message shifts by a different amount.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" data-label="THE PROCESS">
+
+  <!-- STEP BY STEP -->
+  <div class="section">
+    <div class="section-num">3 — ENCRYPTION</div>
+    <div class="section-title">Step by Step</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">FRACTIONATION</div>
+        <div class="step-body">Each character in your message is looked up in the grid and converted to a row/column coordinate pair. A 5-character message produces 5 row values and 5 column values — 10 numbers total.</div>
+        <div class="example">
+          <span class="lbl">MESSAGE: HELLO</span>
+          H <span class="arr">→</span> <span class="val">(2,6)</span> &nbsp; E <span class="arr">→</span> <span class="val">(2,1)</span> &nbsp; L <span class="arr">→</span> <span class="val">(3,4)</span> &nbsp; L <span class="arr">→</span> <span class="val">(3,4)</span> &nbsp; O <span class="arr">→</span> <span class="val">(1,1)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">SHIFT</div>
+        <div class="step-body">Each coordinate is shifted by the next digit in the Shift Sequence (cycling back to the start when it runs out). The shift wraps around the grid — going past 6 loops back to 1. All rows are shifted first, then all columns.</div>
+        <div class="example">
+          <span class="lbl">SHIFT SEQUENCE: 719</span>
+          Row values: <span class="val">2 2 3 3 1</span> + shifts <span class="val">7 1 9 7 1</span> → <span class="val">3 3 6 4 2</span>
+          Col values: <span class="val">6 1 4 4 1</span> + shifts <span class="val">9 7 1 9 7</span> → <span class="val">3 2 5 7→1 2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">TRANSPOSITION</div>
+        <div class="step-body">All shifted rows and columns are joined into one long sequence and written in columns under the letters of the Transposition Key. The columns are then read back in the alphabetical order of the key's letters — completely scrambling the sequence.</div>
+        <div class="example">
+          <span class="lbl">TRANSPOSITION KEY: VOID</span>
+          V &nbsp; O &nbsp; I &nbsp; D
+          ─ &nbsp; ─ &nbsp; ─ &nbsp; ─
+          3 &nbsp; 3 &nbsp; 6 &nbsp; 4   ← shifted rows
+          2 &nbsp; 3 &nbsp; 2 &nbsp; 1   ← more values
+          ...
+          Read back in order: D I O V → scrambled sequence
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">RECOMBINATION</div>
+        <div class="step-body">The scrambled sequence is read back as coordinate pairs (first number = row, second = column) and each pair is looked up in the grid. Whatever character lives at that address becomes part of the ciphertext.</div>
+        <div class="example">
+          <span class="lbl">FINAL LOOKUP</span>
+          Scrambled pair <span class="val">(4,2)</span> <span class="arr">→</span> grid lookup <span class="arr">→</span> <span class="val">Q</span>
+          Scrambled pair <span class="val">(1,5)</span> <span class="arr">→</span> grid lookup <span class="arr">→</span> <span class="val">U</span>
+          ...and so on until the ciphertext is complete
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="divider" data-label="MULTI-PASS">
+
+  <div class="section">
+    <div class="section-num">4 — PASSES</div>
+    <div class="section-title">Running It Multiple Times</div>
+    <div class="section-body">
+      <p>A single pass through the cipher is reasonably strong. But Void Matrix lets you run 1–4 passes. Each pass takes the ciphertext from the previous pass and feeds it back in as input, using the same three keys.</p>
+      <p>This is called diffusion — each additional pass spreads patterns further and makes frequency analysis increasingly useless. Two passes is a significant jump in difficulty. Four passes is effectively impractical to brute-force.</p>
+      <p>To decrypt, the same pass count must be used in reverse. The app handles this automatically — set the same number of passes and hit decrypt.</p>
+    </div>
+    <div class="accent-block">
+      <p>Important: the pass count is encoded into the VMC-MSG share blob automatically. If you load a blob, the app sets the correct pass count for you.</p>
+    </div>
+  </div>
+
+  <hr class="divider" data-label="DECRYPTION">
+
+  <div class="section">
+    <div class="section-num">5 — DECRYPTION</div>
+    <div class="section-title">Running It Backwards</div>
+    <div class="section-body">
+      <p>Decryption is every step in reverse. The ciphertext characters are looked up in the grid to recover coordinates, the transposition is un-scrambled, the shifts are subtracted instead of added, and the resulting coordinates map back to the original characters.</p>
+      <p>The app handles all of this automatically. All you need are the same three keys and the same pass count used to encrypt.</p>
+    </div>
+  </div>
+
+  <hr class="divider" data-label="SECURITY">
+
+  <div class="section">
+    <div class="section-num">6 — SECURITY</div>
+    <div class="section-title">Why It's Hard to Break</div>
+    <div class="section-body">
+      <p>Three separate keyspaces have to be searched simultaneously to crack this cipher:</p>
+    </div>
+    <div class="example" style="margin:16px 0 24px;">
+      Grid Key permutations: &nbsp;&nbsp;&nbsp;<span class="val">36! ≈ 3.7 × 10⁴¹</span>
+      Transposition perms: &nbsp;&nbsp;&nbsp;&nbsp;<span class="val">N! where N = key length</span>
+      Shift combinations: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="val">10^(digit count)</span>
+      Combined keyspace: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="val">effectively astronomical</span>
+    </div>
+    <div class="section-body">
+      <p>Even knowing the algorithm completely — even having the source code — an attacker still needs all three keys. The cipher's strength comes from the keys, not from secrecy about how it works. This is a well-established principle in cryptography called Kerckhoffs's principle.</p>
+      <p>That said: Void Matrix is a classical cipher, not a modern cryptographic primitive like AES. It's not recommended for protecting state secrets. It's designed for personal use — secure communication between people who share keys, with a strong emphasis on usability and aesthetic.</p>
+    </div>
+  </div>
+
+  <hr class="divider" data-label="FAQ">
+
+  <div class="section">
+    <div class="section-num">7 — FAQ</div>
+    <div class="section-title">Common Questions</div>
+
+    <div class="faq-item">
+      <div class="faq-q">What happens if I use the wrong keys to decrypt?</div>
+      <div class="faq-a">You'll get garbled output — random-looking characters. The app will warn you if it detects no vowels in the decrypted text, which is a strong signal something is wrong.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does my message leave my device?</div>
+      <div class="faq-a">No. All encryption and decryption runs entirely in your browser. No data is sent to any server. The app works completely offline after the first load.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What's the VMC-MSG blob?</div>
+      <div class="faq-a">It's a base64-encoded string containing your Grid Key, Transposition Key, Shift Sequence, pass count, and ciphertext bundled together. Your recipient pastes it into the app and loads it — all keys fill automatically and the message decrypts in one tap.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What does the Index of Coincidence tell me?</div>
+      <div class="faq-a">It measures how flat the character frequency distribution is in your ciphertext. A perfectly random cipher produces an IC near 0.0278. Higher values mean patterns exist — try longer keys or more passes.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I encrypt numbers and symbols?</div>
+      <div class="faq-a">Numbers 0–9 are part of the grid and encrypt normally. Symbols, spaces, and punctuation are stripped out before encryption — only A–Z and 0–9 are valid input characters.</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:40px 0 20px;">
+    <a href="cipher.html" class="btn btn-primary">▸ TRY IT NOW</a>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
+  <div class="footer-r">
+    <a href="index.html">HOME</a>
+    &nbsp;·&nbsp;
+    <a href="about.html">ABOUT</a>
+  </div>
+</footer>
+
+<script>
+function toggleNav(){
+  document.getElementById('navLinks').classList.toggle('open');
+}
+</script>
+</body>
+</html>

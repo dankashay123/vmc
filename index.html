@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Void Matrix — Terminal Encryption</title>
+<meta name="description" content="Void Matrix — a terminal-aesthetic cipher tool built on a 6×6 Polybius grid with a three-key system.">
+<meta name="theme-color" content="#010103">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ── HERO ────────────────────────────────────── */
+.hero{
+  min-height:calc(100vh - 48px);
+  display:flex;flex-direction:column;
+  justify-content:center;
+  padding:80px 40px;
+  position:relative;
+  overflow:hidden;
+}
+@media(max-width:600px){.hero{padding:48px 16px;min-height:calc(100vh - 48px);}}
+
+/* Animated grid background */
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;
+  opacity:0.06;overflow:hidden;
+}
+.hero-grid-inner{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  gap:1px;height:100%;
+}
+.hero-grid-cell{
+  background:var(--bd1);
+  animation:cell-idle 4s ease-in-out infinite;
+}
+.hero-grid-cell.lit{background:var(--acc);}
+
+/* Corner brackets */
+.hero::before,.hero::after{
+  content:'';position:absolute;width:40px;height:40px;
+  border-color:var(--bd2);border-style:solid;
+}
+.hero::before{top:24px;left:24px;border-width:1px 0 0 1px;}
+.hero::after{bottom:24px;right:24px;border-width:0 1px 1px 0;}
+
+.hero-content{position:relative;z-index:1;max-width:700px;}
+.hero-eyebrow{
+  font-size:9px;letter-spacing:5px;color:var(--t1);
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.hero-eyebrow::before{
+  content:'';display:inline-block;width:24px;height:1px;background:var(--acc);
+}
+.hero-title{
+  font-family:'VT323',monospace;
+  font-size:clamp(52px,10vw,120px);
+  letter-spacing:6px;line-height:0.95;
+  color:var(--t3);
+  margin-bottom:8px;
+  animation:flicker 8s ease-in-out infinite;
+}
+.hero-title .acc{
+  color:var(--acc);
+  text-shadow:0 0 30px rgba(0,224,68,0.4),0 0 60px rgba(0,224,68,0.15);
+}
+.hero-sub{
+  font-family:'VT323',monospace;font-size:clamp(18px,3vw,28px);
+  letter-spacing:4px;color:var(--t1);margin-bottom:32px;
+}
+.hero-desc{
+  font-size:11px;color:var(--t2);letter-spacing:1px;line-height:2.1;
+  max-width:500px;margin-bottom:40px;
+}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.hero-stat-row{
+  display:flex;gap:32px;margin-top:56px;flex-wrap:wrap;
+}
+.hero-stat{border-left:1px solid var(--bd1);padding-left:16px;}
+.hero-stat-num{
+  font-family:'VT323',monospace;font-size:32px;letter-spacing:2px;
+  color:var(--acc);text-shadow:0 0 10px var(--accg);
+}
+.hero-stat-lbl{font-size:7px;letter-spacing:3px;color:var(--t1);margin-top:2px;}
+
+/* ── FEATURES ────────────────────────────────── */
+.features{padding:80px 40px;max-width:900px;margin:0 auto;}
+@media(max-width:600px){.features{padding:48px 16px;}}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--bd0);border:1px solid var(--bd0);
+  margin-top:32px;
+}
+@media(max-width:700px){.features-grid{grid-template-columns:1fr;}}
+.feature{
+  background:var(--panel);padding:24px;
+  transition:background .2s;
+}
+.feature:hover{background:var(--win);}
+.feature-icon{
+  font-family:'VT323',monospace;font-size:28px;color:var(--acc);
+  margin-bottom:10px;
+  text-shadow:0 0 8px var(--accg);
+}
+.feature-title{
+  font-family:'VT323',monospace;font-size:16px;letter-spacing:2px;
+  color:var(--t3);margin-bottom:6px;
+}
+.feature-body{font-size:9px;color:var(--t1);letter-spacing:1px;line-height:1.9;}
+
+/* ── PREVIEW STRIP ───────────────────────────── */
+.preview{
+  border-top:1px solid var(--bd0);border-bottom:1px solid var(--bd0);
+  padding:48px 40px;background:var(--panel);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:40px;flex-wrap:wrap;
+}
+@media(max-width:600px){.preview{padding:32px 16px;}}
+.preview-text{max-width:400px;}
+.preview-text h2{
+  font-family:'VT323',monospace;font-size:36px;letter-spacing:3px;
+  color:var(--t3);margin-bottom:12px;
+}
+.preview-text p{font-size:10px;color:var(--t1);letter-spacing:1px;line-height:2;}
+.preview-matrix{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:var(--t2);letter-spacing:3px;line-height:2;
+  border:1px solid var(--bd1);padding:16px 20px;
+  background:var(--win);flex-shrink:0;
+  position:relative;
+}
+.preview-matrix .hl{color:var(--acc);text-shadow:0 0 6px var(--accg);}
+.preview-matrix::before{
+  content:'// MATRIX';position:absolute;top:-8px;left:12px;
+  font-size:7px;letter-spacing:2px;color:var(--t1);
+  background:var(--panel);padding:0 6px;
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">VOID MATRIX</a>
+  <button class="nav-menu-btn" onclick="toggleNav()">☰ MENU</button>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html" class="nav-link active">HOME</a>
+    <a href="how-it-works.html" class="nav-link">HOW IT WORKS</a>
+    <a href="about.html" class="nav-link">ABOUT</a>
+    <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid" id="heroGrid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">TERMINAL ENCRYPTION TOOL</div>
+    <div class="hero-title">VOID<br><span class="acc">MATRIX</span></div>
+    <div class="hero-sub">// CIPHER SYSTEM v3.0</div>
+    <p class="hero-desc">
+      A classical cipher architecture built on a 6×6 Polybius grid,
+      three-key encryption, and multi-pass diffusion. Runs entirely
+      in your browser. No servers. No logs. Nothing leaves your device.
+    </p>
+    <div class="hero-actions">
+      <a href="cipher.html" class="btn btn-primary">▸ LAUNCH CIPHER</a>
+      <a href="how-it-works.html" class="btn btn-ghost">HOW IT WORKS</a>
+    </div>
+    <div class="hero-stat-row">
+      <div class="hero-stat">
+        <div class="hero-stat-num">36</div>
+        <div class="hero-stat-lbl">CHARACTER GRID</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">3</div>
+        <div class="hero-stat-lbl">KEY SYSTEM</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">4</div>
+        <div class="hero-stat-lbl">MAX PASSES</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">∞</div>
+        <div class="hero-stat-lbl">KEYSPACE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="preview">
+  <div class="preview-text">
+    <h2>THE MATRIX</h2>
+    <p>Every character maps to a unique coordinate in a 6×6 grid.
+    Your Grid Key shuffles the entire layout — the same message
+    encrypted with different keys produces completely different output.</p>
+  </div>
+  <div class="preview-matrix" id="previewMatrix">
+    loading...
+  </div>
+</section>
+
+<section class="features">
+  <div class="page-eyebrow">CAPABILITIES</div>
+  <div class="page-title">Built for <span>operators.</span></div>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">⚿</div>
+      <div class="feature-title">THREE-KEY SYSTEM</div>
+      <div class="feature-body">Grid Key, Transposition Key, and Shift Sequence work together. Changing any one of them produces completely different ciphertext.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">◈</div>
+      <div class="feature-title">MULTI-PASS</div>
+      <div class="feature-body">Run up to 4 encryption passes using the same keyset. Each pass feeds the previous ciphertext back in, dramatically increasing diffusion.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">◉</div>
+      <div class="feature-title">SHARE BLOBS</div>
+      <div class="feature-body">Bundle your keys and ciphertext into a single VMC-MSG string. Your recipient pastes it and decrypts instantly — no manual key entry.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">░</div>
+      <div class="feature-title">FREQ ANALYSIS</div>
+      <div class="feature-body">Built-in Index of Coincidence meter and frequency bar chart. See exactly how random your output looks before you send it.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">▸</div>
+      <div class="feature-title">STEP-THROUGH</div>
+      <div class="feature-body">Watch the cipher process one character at a time. Blue cells show source coordinates, green cells show output. Full playback control.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⟐</div>
+      <div class="feature-title">OFFLINE FIRST</div>
+      <div class="feature-body">Installs as a PWA on iPhone. Works completely offline after first load. Nothing is ever transmitted — all encryption is local.</div>
+    </div>
+  </div>
+</section>
+
+<div style="text-align:center;padding:48px 16px 80px;">
+  <a href="cipher.html" class="btn btn-primary" style="font-size:20px;padding:12px 48px;">▸ LAUNCH CIPHER</a>
+</div>
+
+<footer class="footer">
+  <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
+  <div class="footer-r">
+    <a href="how-it-works.html">HOW IT WORKS</a>
+    &nbsp;·&nbsp;
+    <a href="about.html">ABOUT</a>
+  </div>
+</footer>
+
+<script>
+function toggleNav(){
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+// Build animated hero grid
+const grid=document.getElementById('heroGrid');
+const inner=document.createElement('div');
+inner.className='hero-grid-inner';
+const cells=[];
+for(let i=0;i<120;i++){
+  const c=document.createElement('div');
+  c.className='hero-grid-cell';
+  inner.appendChild(c);cells.push(c);
+}
+grid.appendChild(inner);
+
+// Randomly light cells
+function randomLit(){
+  cells.forEach(c=>c.classList.remove('lit'));
+  const count=Math.floor(Math.random()*8)+3;
+  for(let i=0;i<count;i++){
+    cells[Math.floor(Math.random()*cells.length)].classList.add('lit');
+  }
+}
+setInterval(randomLit,1200);
+randomLit();
+
+// Preview matrix
+const ALPHABET='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function buildGrid(kw){
+  kw=(kw||'OBSCURE').toUpperCase();
+  const seen=new Set(),g=[];
+  for(const c of kw) if(ALPHABET.includes(c)&&!seen.has(c)){seen.add(c);g.push(c);}
+  for(const c of ALPHABET) if(!seen.has(c)){seen.add(c);g.push(c);}
+  const m=[];for(let r=0;r<6;r++) m.push(g.slice(r*6,r*6+6));
+  return m;
+}
+const m=buildGrid('OBSCURE');
+const hiCells=new Set([8,15,21]);
+let html='';
+for(let r=0;r<6;r++){
+  for(let c=0;c<6;c++){
+    const idx=r*6+c;
+    const ch=m[r][c];
+    html+=hiCells.has(idx)?`<span class="hl">${ch}</span> `:ch+' ';
+  }
+  html=html.trimEnd()+(r<5?'\n':'');
+}
+document.getElementById('previewMatrix').innerHTML=html;
+</script>
+</body>
+</html>

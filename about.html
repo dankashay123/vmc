@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>About — Void Matrix</title>
+<meta name="description" content="About Void Matrix — a terminal cipher tool built for personal use.">
+<meta name="theme-color" content="#010103">
+<link rel="stylesheet" href="style.css">
+<style>
+.about-lead{
+  font-size:15px;color:var(--t2);letter-spacing:1px;line-height:2.2;
+  max-width:620px;margin-bottom:48px;
+  border-left:2px solid var(--acc);
+  padding-left:20px;
+}
+.about-section{margin-bottom:56px;}
+.about-section h2{
+  font-family:'VT323',monospace;font-size:clamp(24px,3vw,36px);
+  letter-spacing:3px;color:var(--t3);margin-bottom:16px;
+}
+.about-section p{
+  font-size:11px;color:var(--t2);letter-spacing:1px;
+  line-height:2.1;max-width:660px;margin-bottom:16px;
+}
+.about-section p:last-child{margin-bottom:0;}
+
+.spec-table{width:100%;max-width:600px;border-collapse:collapse;margin:24px 0;}
+.spec-table tr{border-bottom:1px solid var(--bd0);}
+.spec-table td{
+  padding:10px 0;font-size:10px;letter-spacing:1px;
+  font-family:'Share Tech Mono',monospace;
+  vertical-align:top;
+}
+.spec-table td:first-child{
+  color:var(--t1);width:40%;padding-right:20px;
+}
+.spec-table td:last-child{color:var(--t3);}
+
+.principles{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--bd0);margin:24px 0;max-width:700px;
+}
+@media(max-width:500px){.principles{grid-template-columns:1fr;}}
+.principle{
+  background:var(--panel);padding:20px;
+}
+.principle-title{
+  font-family:'VT323',monospace;font-size:16px;letter-spacing:2px;
+  color:var(--acc);margin-bottom:6px;
+}
+.principle-body{font-size:9px;color:var(--t1);letter-spacing:1px;line-height:1.9;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">VOID MATRIX</a>
+  <button class="nav-menu-btn" onclick="toggleNav()">☰ MENU</button>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html" class="nav-link">HOME</a>
+    <a href="how-it-works.html" class="nav-link">HOW IT WORKS</a>
+    <a href="about.html" class="nav-link active">ABOUT</a>
+    <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-eyebrow">THE PROJECT</div>
+  <h1 class="page-title">About <span>Void Matrix</span></h1>
+
+  <p class="about-lead">
+    A personal encryption tool built from scratch. Classical cipher
+    architecture, terminal aesthetic, mobile-first. Runs entirely
+    in the browser — no accounts, no servers, no tracking.
+  </p>
+
+  <hr class="divider" data-label="ORIGIN">
+
+  <div class="about-section">
+    <h2>WHERE IT CAME FROM</h2>
+    <p>Void Matrix started as a curiosity — what would it look like to build a functional cipher tool that felt like it belonged in a cold war signals unit, or on the screen of a hacker in an 80s film? Something that took encryption seriously but also had a distinct personality.</p>
+    <p>The cipher itself is grounded in real classical techniques — Polybius square fractionation, columnar transposition, cyclic shifting — combined into a three-key system that's simple enough to understand but strong enough to be genuinely useful for personal communication.</p>
+    <p>The aesthetic came from a love of CRT terminals, phosphor glow, the visual language of old cipher machines, and the idea that security tools don't have to look sterile and corporate to be taken seriously.</p>
+  </div>
+
+  <hr class="divider" data-label="DESIGN PRINCIPLES">
+
+  <div class="about-section">
+    <h2>HOW IT'S BUILT</h2>
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-title">LOCAL FIRST</div>
+        <div class="principle-body">Everything runs in the browser. No keys, messages, or metadata are ever transmitted anywhere. The app works completely offline after the first load.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-title">SINGLE FILE</div>
+        <div class="principle-body">The entire cipher engine, UI, animations, and sound design live in one HTML file. No build toolchain, no dependencies beyond two fonts and a QR library.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-title">MOBILE FIRST</div>
+        <div class="principle-body">Designed primarily for iPhone. Installs as a PWA, works offline, respects safe area insets. The layout is optimized for one-handed use.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-title">TRANSPARENT</div>
+        <div class="principle-body">The algorithm is fully documented and the source is open. Security comes from the keys — not from hiding how it works. Kerckhoffs's principle.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" data-label="TECHNICAL SPEC">
+
+  <div class="about-section">
+    <h2>TECHNICAL SPEC</h2>
+    <table class="spec-table">
+      <tr><td>CIPHER TYPE</td><td>Polybius square fractionation with columnar transposition and cyclic shifting</td></tr>
+      <tr><td>GRID</td><td>6×6 · 36 characters · A–Z (I/J distinct) + 0–9</td></tr>
+      <tr><td>KEY SYSTEM</td><td>Three independent keys: Grid Key, Transposition Key, Shift Sequence</td></tr>
+      <tr><td>PASSES</td><td>1–4 iterative encryption passes</td></tr>
+      <tr><td>OUTPUT FORMAT</td><td>A–Z and 0–9 only · optional GROUP 5 chunking</td></tr>
+      <tr><td>SHARE FORMAT</td><td>VMC-MSG: base64-encoded JSON blob (keys + ciphertext + pass count)</td></tr>
+      <tr><td>PLATFORM</td><td>Single-file HTML/JS · no build toolchain · PWA installable</td></tr>
+      <tr><td>RUNTIME</td><td>Browser-only · zero network requests during operation</td></tr>
+      <tr><td>SOUND</td><td>Web Audio API · ciphertext-derived melody on encrypt</td></tr>
+      <tr><td>VERSION</td><td>v3.0</td></tr>
+    </table>
+  </div>
+
+  <hr class="divider" data-label="LIMITATIONS">
+
+  <div class="about-section">
+    <h2>HONEST LIMITATIONS</h2>
+    <p>Void Matrix is a classical cipher. It is not AES, RSA, or any modern cryptographic primitive. It has not been formally audited. It is not recommended for protecting sensitive data in high-threat environments.</p>
+    <p>What it is: a well-designed personal cipher that's genuinely difficult to crack without the keys, built for private communication between people who want something more interesting than sending plaintext — and who want to understand what their tools are actually doing.</p>
+    <p>Use it accordingly.</p>
+  </div>
+
+  <div style="text-align:center;padding:40px 0 20px;">
+    <a href="cipher.html" class="btn btn-primary">▸ LAUNCH CIPHER</a>
+    &nbsp;&nbsp;
+    <a href="how-it-works.html" class="btn btn-ghost">HOW IT WORKS</a>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
+  <div class="footer-r">
+    <a href="index.html">HOME</a>
+    &nbsp;·&nbsp;
+    <a href="how-it-works.html">HOW IT WORKS</a>
+  </div>
+</footer>
+
+<script>
+function toggleNav(){
+  document.getElementById('navLinks').classList.toggle('open');
+}
+</script>
+</body>
+</html>
