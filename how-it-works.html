@@ -103,6 +103,7 @@
 </style>
 </head>
 <body>
+<div class="cursor" id="cursor"></div>
 
 <nav class="nav">
   <a href="index.html" class="nav-brand">VOID MATRIX</a>
@@ -334,6 +335,17 @@
 function toggleNav(){
   document.getElementById('navLinks').classList.toggle('open');
 }
+</script>
+<script>
+const cur=document.getElementById("cursor");
+if(cur&&window.matchMedia("(pointer:fine)").matches){
+  document.addEventListener("mousemove",e=>{cur.style.left=e.clientX+"px";cur.style.top=e.clientY+"px";});
+  document.addEventListener("mousedown",()=>cur.classList.add("click"));
+  document.addEventListener("mouseup",()=>cur.classList.remove("click"));
+  document.querySelectorAll("a,button,input").forEach(el=>{el.addEventListener("mouseenter",()=>cur.classList.add("hover"));el.addEventListener("mouseleave",()=>cur.classList.remove("hover"));});
+}else if(cur){cur.style.display="none";}
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add("visible");});},{threshold:0.1});
+document.querySelectorAll(".reveal").forEach(el=>obs.observe(el));
 </script>
 </body>
 </html>

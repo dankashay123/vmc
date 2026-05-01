@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Void Matrix — Terminal Encryption</title>
-<meta name="description" content="Void Matrix — a terminal-aesthetic cipher tool built on a 6×6 Polybius grid with a three-key system.">
+<meta name="description" content="Void Matrix — a terminal cipher tool built on a 6×6 Polybius grid with a three-key system. Runs entirely in your browser.">
 <meta name="theme-color" content="#010103">
+<meta property="og:title" content="Void Matrix — Terminal Encryption">
+<meta property="og:description" content="A terminal cipher tool. Three keys. Zero servers. Nothing leaves your device.">
+<meta property="og:type" content="website">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="stylesheet" href="style.css">
@@ -13,135 +16,129 @@
 /* ── HERO ────────────────────────────────────── */
 .hero{
   min-height:calc(100vh - 48px);
-  display:flex;flex-direction:column;
-  justify-content:center;
-  padding:80px 40px;
-  position:relative;
-  overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:80px 60px;position:relative;overflow:hidden;
 }
-@media(max-width:600px){.hero{padding:48px 16px;min-height:calc(100vh - 48px);}}
-
-/* Animated grid background */
-.hero-grid{
-  position:absolute;inset:0;pointer-events:none;
-  opacity:0.06;overflow:hidden;
-}
-.hero-grid-inner{
-  display:grid;grid-template-columns:repeat(12,1fr);
-  gap:1px;height:100%;
-}
-.hero-grid-cell{
-  background:var(--bd1);
-  animation:cell-idle 4s ease-in-out infinite;
-}
-.hero-grid-cell.lit{background:var(--acc);}
-
-/* Corner brackets */
-.hero::before,.hero::after{
-  content:'';position:absolute;width:40px;height:40px;
-  border-color:var(--bd2);border-style:solid;
-}
-.hero::before{top:24px;left:24px;border-width:1px 0 0 1px;}
-.hero::after{bottom:24px;right:24px;border-width:0 1px 1px 0;}
-
-.hero-content{position:relative;z-index:1;max-width:700px;}
+@media(max-width:600px){.hero{padding:48px 20px;}}
+.hero-canvas{position:absolute;inset:0;pointer-events:none;opacity:0.07;}
+.corner{position:absolute;width:32px;height:32px;border-color:var(--bd2);border-style:solid;}
+.corner-tl{top:20px;left:20px;border-width:1px 0 0 1px;}
+.corner-tr{top:20px;right:20px;border-width:1px 1px 0 0;}
+.corner-bl{bottom:20px;left:20px;border-width:0 0 1px 1px;}
+.corner-br{bottom:20px;right:20px;border-width:0 1px 1px 0;}
+.hero-content{position:relative;z-index:1;max-width:720px;}
 .hero-eyebrow{
-  font-size:9px;letter-spacing:5px;color:var(--t1);
-  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+  font-size:8px;letter-spacing:6px;color:var(--t1);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;animation:fade-up .6s ease .2s forwards;
 }
-.hero-eyebrow::before{
-  content:'';display:inline-block;width:24px;height:1px;background:var(--acc);
-}
+.hero-eyebrow::before{content:'';display:inline-block;width:28px;height:1px;background:var(--acc);}
 .hero-title{
   font-family:'VT323',monospace;
-  font-size:clamp(52px,10vw,120px);
-  letter-spacing:6px;line-height:0.95;
-  color:var(--t3);
-  margin-bottom:8px;
+  font-size:clamp(60px,12vw,140px);
+  letter-spacing:6px;line-height:0.92;color:var(--t3);margin-bottom:6px;
   animation:flicker 8s ease-in-out infinite;
 }
-.hero-title .acc{
-  color:var(--acc);
-  text-shadow:0 0 30px rgba(0,224,68,0.4),0 0 60px rgba(0,224,68,0.15);
-}
+.hero-title .acc{color:var(--acc);text-shadow:0 0 40px rgba(0,224,68,0.4),0 0 80px rgba(0,224,68,0.15);}
 .hero-sub{
-  font-family:'VT323',monospace;font-size:clamp(18px,3vw,28px);
-  letter-spacing:4px;color:var(--t1);margin-bottom:32px;
+  font-family:'VT323',monospace;font-size:clamp(16px,2.5vw,24px);
+  letter-spacing:5px;color:var(--t1);margin-bottom:36px;
+  opacity:0;animation:fade-up .6s ease .5s forwards;
 }
 .hero-desc{
-  font-size:11px;color:var(--t2);letter-spacing:1px;line-height:2.1;
-  max-width:500px;margin-bottom:40px;
+  font-size:11px;color:var(--t2);letter-spacing:1px;line-height:2.2;
+  max-width:480px;margin-bottom:44px;
+  border-left:1px solid var(--bd2);padding-left:16px;
+  opacity:0;animation:fade-up .6s ease .7s forwards;
 }
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
-.hero-stat-row{
-  display:flex;gap:32px;margin-top:56px;flex-wrap:wrap;
+.hero-actions{
+  display:flex;gap:12px;flex-wrap:wrap;
+  opacity:0;animation:fade-up .6s ease .9s forwards;
+}
+.hero-stats{
+  display:flex;gap:40px;margin-top:60px;flex-wrap:wrap;
+  opacity:0;animation:fade-up .6s ease 1.1s forwards;
 }
 .hero-stat{border-left:1px solid var(--bd1);padding-left:16px;}
-.hero-stat-num{
-  font-family:'VT323',monospace;font-size:32px;letter-spacing:2px;
-  color:var(--acc);text-shadow:0 0 10px var(--accg);
-}
+.hero-stat-num{font-family:'VT323',monospace;font-size:36px;letter-spacing:2px;color:var(--acc);text-shadow:0 0 12px var(--accg);}
 .hero-stat-lbl{font-size:7px;letter-spacing:3px;color:var(--t1);margin-top:2px;}
+@keyframes fade-up{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 
-/* ── FEATURES ────────────────────────────────── */
-.features{padding:80px 40px;max-width:900px;margin:0 auto;}
-@media(max-width:600px){.features{padding:48px 16px;}}
-.features-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-  background:var(--bd0);border:1px solid var(--bd0);
-  margin-top:32px;
-}
-@media(max-width:700px){.features-grid{grid-template-columns:1fr;}}
-.feature{
-  background:var(--panel);padding:24px;
-  transition:background .2s;
-}
-.feature:hover{background:var(--win);}
-.feature-icon{
-  font-family:'VT323',monospace;font-size:28px;color:var(--acc);
-  margin-bottom:10px;
-  text-shadow:0 0 8px var(--accg);
-}
-.feature-title{
-  font-family:'VT323',monospace;font-size:16px;letter-spacing:2px;
-  color:var(--t3);margin-bottom:6px;
-}
-.feature-body{font-size:9px;color:var(--t1);letter-spacing:1px;line-height:1.9;}
-
-/* ── PREVIEW STRIP ───────────────────────────── */
-.preview{
+/* ── LIVE DEMO ───────────────────────────────── */
+.demo-section{
+  background:var(--panel);
   border-top:1px solid var(--bd0);border-bottom:1px solid var(--bd0);
-  padding:48px 40px;background:var(--panel);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:40px;flex-wrap:wrap;
+  padding:64px 60px;
 }
-@media(max-width:600px){.preview{padding:32px 16px;}}
-.preview-text{max-width:400px;}
-.preview-text h2{
-  font-family:'VT323',monospace;font-size:36px;letter-spacing:3px;
-  color:var(--t3);margin-bottom:12px;
-}
-.preview-text p{font-size:10px;color:var(--t1);letter-spacing:1px;line-height:2;}
-.preview-matrix{
-  font-family:'Share Tech Mono',monospace;font-size:11px;
-  color:var(--t2);letter-spacing:3px;line-height:2;
-  border:1px solid var(--bd1);padding:16px 20px;
-  background:var(--win);flex-shrink:0;
-  position:relative;
-}
-.preview-matrix .hl{color:var(--acc);text-shadow:0 0 6px var(--accg);}
-.preview-matrix::before{
-  content:'// MATRIX';position:absolute;top:-8px;left:12px;
+@media(max-width:600px){.demo-section{padding:40px 20px;}}
+.demo-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+@media(max-width:650px){.demo-inner{grid-template-columns:1fr;gap:28px;}}
+.demo-text h2{font-family:'VT323',monospace;font-size:clamp(28px,3vw,44px);letter-spacing:3px;color:var(--t3);margin-bottom:14px;}
+.demo-text p{font-size:10px;color:var(--t1);letter-spacing:1px;line-height:2.1;margin-bottom:24px;}
+.demo-box{background:var(--win);border:1px solid var(--bd1);padding:20px;position:relative;}
+.demo-box::before{
+  content:'// LIVE DEMO';position:absolute;top:-9px;left:12px;
   font-size:7px;letter-spacing:2px;color:var(--t1);
   background:var(--panel);padding:0 6px;
 }
+.demo-input-lbl,.demo-output-lbl{font-size:7px;letter-spacing:3px;color:var(--t1);margin-bottom:6px;}
+.demo-input{
+  width:100%;background:#030508;border:1px solid var(--bd0);border-bottom-color:var(--bd1);
+  color:var(--t4);font-family:'Share Tech Mono',monospace;font-size:14px;
+  padding:8px;outline:none;letter-spacing:2px;transition:border-color .18s;
+}
+.demo-input:focus{border-color:var(--bd2);}
+.demo-divider{height:1px;background:var(--bd0);margin:14px 0;}
+.demo-output{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  color:var(--acc);letter-spacing:2px;min-height:28px;
+  word-break:break-all;line-height:1.8;text-shadow:0 0 8px rgba(0,224,68,0.4);
+}
+.demo-output.empty{color:var(--t0);font-size:9px;letter-spacing:1px;font-style:italic;text-shadow:none;}
+.demo-keys{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.demo-key-chip{font-size:7px;letter-spacing:2px;color:var(--t1);border:1px solid var(--bd0);padding:2px 7px;background:var(--panel);}
+.demo-key-chip span{color:var(--t2);}
+
+/* ── FEATURES ────────────────────────────────── */
+.features-section{padding:80px 60px;max-width:900px;margin:0 auto;}
+@media(max-width:600px){.features-section{padding:48px 20px;}}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--bd0);border:1px solid var(--bd0);margin-top:40px;
+}
+@media(max-width:700px){.features-grid{grid-template-columns:1fr;}}
+.feature{background:var(--panel);padding:28px;transition:background .2s;}
+.feature:hover{background:#060a0e;}
+.feature-icon{
+  font-family:'VT323',monospace;font-size:32px;color:var(--acc);
+  margin-bottom:12px;text-shadow:0 0 8px var(--accg);transition:text-shadow .2s;
+}
+.feature:hover .feature-icon{text-shadow:0 0 16px var(--accg),0 0 32px var(--accg);}
+.feature-title{font-family:'VT323',monospace;font-size:18px;letter-spacing:2px;color:var(--t3);margin-bottom:8px;}
+.feature-body{font-size:9px;color:var(--t1);letter-spacing:1px;line-height:2.1;}
+
+/* ── CTA ─────────────────────────────────────── */
+.cta-section{
+  text-align:center;padding:80px 40px;
+  border-top:1px solid var(--bd0);position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 60% at 50% 50%,var(--accg),transparent);
+  pointer-events:none;
+}
+.cta-section h2{font-family:'VT323',monospace;font-size:clamp(32px,5vw,60px);letter-spacing:4px;color:var(--t3);margin-bottom:16px;position:relative;}
+.cta-section p{font-size:10px;color:var(--t1);letter-spacing:1px;margin-bottom:36px;position:relative;}
+.cta-section .btn{position:relative;font-size:20px;padding:12px 52px;}
 </style>
 </head>
 <body>
 
+<div class="cursor" id="cursor"></div>
+
 <nav class="nav">
   <a href="index.html" class="nav-brand">VOID MATRIX</a>
-  <button class="nav-menu-btn" onclick="toggleNav()">☰ MENU</button>
+  <button class="nav-menu-btn" onclick="toggleNav()">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="index.html" class="nav-link active">HOME</a>
     <a href="how-it-works.html" class="nav-link">HOW IT WORKS</a>
@@ -151,153 +148,227 @@
 </nav>
 
 <section class="hero">
-  <div class="hero-grid" id="heroGrid"></div>
+  <canvas class="hero-canvas" id="heroCanvas"></canvas>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
   <div class="hero-content">
     <div class="hero-eyebrow">TERMINAL ENCRYPTION TOOL</div>
-    <div class="hero-title">VOID<br><span class="acc">MATRIX</span></div>
+    <div class="hero-title"><span id="heroVoid">VOID</span><br><span class="acc" id="heroAcc">MATRIX</span></div>
     <div class="hero-sub">// CIPHER SYSTEM v3.0</div>
-    <p class="hero-desc">
-      A classical cipher architecture built on a 6×6 Polybius grid,
-      three-key encryption, and multi-pass diffusion. Runs entirely
-      in your browser. No servers. No logs. Nothing leaves your device.
-    </p>
+    <p class="hero-desc">A classical cipher built on a 6×6 Polybius grid and a three-key system. Runs entirely in your browser. No servers. No logs. Nothing leaves your device.</p>
     <div class="hero-actions">
       <a href="cipher.html" class="btn btn-primary">▸ LAUNCH CIPHER</a>
       <a href="how-it-works.html" class="btn btn-ghost">HOW IT WORKS</a>
     </div>
-    <div class="hero-stat-row">
-      <div class="hero-stat">
-        <div class="hero-stat-num">36</div>
-        <div class="hero-stat-lbl">CHARACTER GRID</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">3</div>
-        <div class="hero-stat-lbl">KEY SYSTEM</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">4</div>
-        <div class="hero-stat-lbl">MAX PASSES</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">∞</div>
-        <div class="hero-stat-lbl">KEYSPACE</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">36</div><div class="hero-stat-lbl">CHARACTER GRID</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-lbl">KEY SYSTEM</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-lbl">MAX PASSES</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">0</div><div class="hero-stat-lbl">SERVERS</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="demo-inner">
+    <div class="demo-text reveal">
+      <h2>TRY IT NOW</h2>
+      <p>Type anything below and watch it encrypt in real time. Every character routes through the 6×6 matrix, gets shifted, transposed, and recombined into ciphertext.</p>
+      <a href="cipher.html" class="btn btn-ghost" style="font-size:13px;padding:6px 20px;">OPEN FULL CIPHER ▸</a>
+    </div>
+    <div class="demo-box reveal reveal-delay-2">
+      <div class="demo-input-lbl">PLAINTEXT</div>
+      <input class="demo-input" id="demoInput" type="text" placeholder="TYPE HERE..." maxlength="40" autocomplete="off" spellcheck="false">
+      <div class="demo-divider"></div>
+      <div class="demo-output-lbl">CIPHERTEXT</div>
+      <div class="demo-output empty" id="demoOutput">awaiting input...</div>
+      <div class="demo-keys">
+        <div class="demo-key-chip">GK <span>OBSCURE</span></div>
+        <div class="demo-key-chip">TK <span>VOID</span></div>
+        <div class="demo-key-chip">SS <span>719</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="preview">
-  <div class="preview-text">
-    <h2>THE MATRIX</h2>
-    <p>Every character maps to a unique coordinate in a 6×6 grid.
-    Your Grid Key shuffles the entire layout — the same message
-    encrypted with different keys produces completely different output.</p>
-  </div>
-  <div class="preview-matrix" id="previewMatrix">
-    loading...
-  </div>
-</section>
-
-<section class="features">
-  <div class="page-eyebrow">CAPABILITIES</div>
-  <div class="page-title">Built for <span>operators.</span></div>
+<section class="features-section">
+  <div class="page-eyebrow reveal">CAPABILITIES</div>
+  <h2 class="page-title reveal reveal-delay-1">Built for <span>operators.</span></h2>
   <div class="features-grid">
-    <div class="feature">
-      <div class="feature-icon">⚿</div>
-      <div class="feature-title">THREE-KEY SYSTEM</div>
-      <div class="feature-body">Grid Key, Transposition Key, and Shift Sequence work together. Changing any one of them produces completely different ciphertext.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">◈</div>
-      <div class="feature-title">MULTI-PASS</div>
-      <div class="feature-body">Run up to 4 encryption passes using the same keyset. Each pass feeds the previous ciphertext back in, dramatically increasing diffusion.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">◉</div>
-      <div class="feature-title">SHARE BLOBS</div>
-      <div class="feature-body">Bundle your keys and ciphertext into a single VMC-MSG string. Your recipient pastes it and decrypts instantly — no manual key entry.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">░</div>
-      <div class="feature-title">FREQ ANALYSIS</div>
-      <div class="feature-body">Built-in Index of Coincidence meter and frequency bar chart. See exactly how random your output looks before you send it.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">▸</div>
-      <div class="feature-title">STEP-THROUGH</div>
-      <div class="feature-body">Watch the cipher process one character at a time. Blue cells show source coordinates, green cells show output. Full playback control.</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">⟐</div>
-      <div class="feature-title">OFFLINE FIRST</div>
-      <div class="feature-body">Installs as a PWA on iPhone. Works completely offline after first load. Nothing is ever transmitted — all encryption is local.</div>
-    </div>
+    <div class="feature reveal"><div class="feature-icon">⚿</div><div class="feature-title">THREE-KEY SYSTEM</div><div class="feature-body">Grid Key, Transposition Key, and Shift Sequence work together. Changing any one produces completely different ciphertext.</div></div>
+    <div class="feature reveal reveal-delay-1"><div class="feature-icon">◈</div><div class="feature-title">MULTI-PASS</div><div class="feature-body">Up to 4 encryption passes with the same keyset. Each pass feeds ciphertext back in, dramatically increasing diffusion.</div></div>
+    <div class="feature reveal reveal-delay-2"><div class="feature-icon">◉</div><div class="feature-title">SHARE BLOBS</div><div class="feature-body">Bundle keys and ciphertext into a single VMC-MSG string. Recipient pastes it and decrypts instantly.</div></div>
+    <div class="feature reveal reveal-delay-1"><div class="feature-icon">░</div><div class="feature-title">FREQ ANALYSIS</div><div class="feature-body">Built-in Index of Coincidence and frequency chart. See exactly how random your output looks before sending.</div></div>
+    <div class="feature reveal reveal-delay-2"><div class="feature-icon">▸</div><div class="feature-title">STEP-THROUGH</div><div class="feature-body">Watch the cipher process one character at a time. Blue = source, green = output. Full playback control.</div></div>
+    <div class="feature reveal reveal-delay-3"><div class="feature-icon">⟐</div><div class="feature-title">OFFLINE FIRST</div><div class="feature-body">Installs as a PWA on iPhone. Works completely offline. All encryption is local — nothing is ever transmitted.</div></div>
   </div>
 </section>
 
-<div style="text-align:center;padding:48px 16px 80px;">
-  <a href="cipher.html" class="btn btn-primary" style="font-size:20px;padding:12px 48px;">▸ LAUNCH CIPHER</a>
-</div>
+<section class="cta-section reveal">
+  <h2>READY TO TRANSMIT?</h2>
+  <p>No account. No install. Just open it and start encrypting.</p>
+  <a href="cipher.html" class="btn btn-primary">▸ LAUNCH CIPHER</a>
+</section>
 
 <footer class="footer">
   <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
   <div class="footer-r">
-    <a href="how-it-works.html">HOW IT WORKS</a>
-    &nbsp;·&nbsp;
+    <a href="how-it-works.html">HOW IT WORKS</a> &nbsp;·&nbsp;
     <a href="about.html">ABOUT</a>
   </div>
 </footer>
 
 <script>
-function toggleNav(){
-  document.getElementById('navLinks').classList.toggle('open');
+// ── CURSOR ───────────────────────────────────────
+const cursor=document.getElementById('cursor');
+if(cursor&&window.matchMedia('(pointer:fine)').matches){
+  document.addEventListener('mousemove',e=>{
+    cursor.style.left=e.clientX+'px';
+    cursor.style.top=e.clientY+'px';
+  });
+  document.addEventListener('mousedown',()=>cursor.classList.add('click'));
+  document.addEventListener('mouseup',()=>cursor.classList.remove('click'));
+  document.querySelectorAll('a,button,input').forEach(el=>{
+    el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
+    el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
+  });
+} else if(cursor){cursor.style.display='none';}
+
+// ── NAV ──────────────────────────────────────────
+function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
+
+// ── MATRIX RAIN ──────────────────────────────────
+const canvas=document.getElementById('heroCanvas');
+const ctx=canvas.getContext('2d');
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+let drops=[];
+const FS=13;
+
+function resize(){
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
+  const cols=Math.floor(canvas.width/FS);
+  drops=Array.from({length:cols},()=>Math.random()*-canvas.height/FS);
+}
+resize();
+window.addEventListener('resize',resize);
+
+function rain(){
+  ctx.fillStyle='rgba(1,1,3,0.06)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.font=FS+'px monospace';
+  drops.forEach((y,i)=>{
+    const ch=CHARS[Math.floor(Math.random()*CHARS.length)];
+    ctx.fillStyle=`rgba(0,224,68,${Math.random()*0.5+0.15})`;
+    ctx.fillText(ch,i*FS,y*FS);
+    if(y*FS>canvas.height&&Math.random()>0.975) drops[i]=0;
+    drops[i]+=0.4;
+  });
+}
+setInterval(rain,50);
+
+// ── HERO GLITCH ───────────────────────────────────
+const GLITCH='█▓▒░▄▀■◆∞∅⊕';
+const NOISE='01';
+
+function glitchEl(el,target,onDone){
+  el.innerHTML='';
+  const spans=target.split('').map(ch=>{
+    const s=document.createElement('span');
+    s.dataset.ch=ch;
+    s.textContent=ch===' '?' ':NOISE[Math.floor(Math.random()*2)];
+    el.appendChild(s);
+    return s;
+  });
+  const n=setInterval(()=>{
+    spans.forEach(s=>{
+      if(!s.classList.contains('r')&&s.dataset.ch!==' '){
+        s.textContent=Math.random()<0.5?NOISE[Math.floor(Math.random()*2)]:GLITCH[Math.floor(Math.random()*GLITCH.length)];
+        s.style.color=Math.random()<0.12?'var(--acc)':'';
+      }
+    });
+  },40);
+  setTimeout(()=>{
+    clearInterval(n);
+    let done=0;
+    const valid=spans.filter(s=>s.dataset.ch!==' ');
+    spans.forEach((s,i)=>{
+      if(s.dataset.ch===' '){s.textContent=' ';return;}
+      const g=setInterval(()=>{if(!s.classList.contains('r'))s.textContent=GLITCH[Math.floor(Math.random()*GLITCH.length)];},35);
+      setTimeout(()=>{
+        clearInterval(g);
+        s.textContent=s.dataset.ch;s.style.color='';s.classList.add('r');
+        done++;
+        if(done>=valid.length&&onDone) onDone();
+      },i*44+Math.random()*55);
+    });
+  },520);
 }
 
-// Build animated hero grid
-const grid=document.getElementById('heroGrid');
-const inner=document.createElement('div');
-inner.className='hero-grid-inner';
-const cells=[];
-for(let i=0;i<120;i++){
-  const c=document.createElement('div');
-  c.className='hero-grid-cell';
-  inner.appendChild(c);cells.push(c);
-}
-grid.appendChild(inner);
+setTimeout(()=>{
+  glitchEl(document.getElementById('heroVoid'),'VOID',()=>{
+    setTimeout(()=>glitchEl(document.getElementById('heroAcc'),'MATRIX'),100);
+  });
+},500);
 
-// Randomly light cells
-function randomLit(){
-  cells.forEach(c=>c.classList.remove('lit'));
-  const count=Math.floor(Math.random()*8)+3;
-  for(let i=0;i<count;i++){
-    cells[Math.floor(Math.random()*cells.length)].classList.add('lit');
-  }
-}
-setInterval(randomLit,1200);
-randomLit();
-
-// Preview matrix
-const ALPHABET='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-function buildGrid(kw){
+// ── LIVE DEMO ─────────────────────────────────────
+const ALPHA='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function bG(kw){
   kw=(kw||'OBSCURE').toUpperCase();
-  const seen=new Set(),g=[];
-  for(const c of kw) if(ALPHABET.includes(c)&&!seen.has(c)){seen.add(c);g.push(c);}
-  for(const c of ALPHABET) if(!seen.has(c)){seen.add(c);g.push(c);}
+  const s=new Set(),g=[];
+  for(const c of kw) if(ALPHA.includes(c)&&!s.has(c)){s.add(c);g.push(c);}
+  for(const c of ALPHA) if(!s.has(c)){s.add(c);g.push(c);}
   const m=[];for(let r=0;r<6;r++) m.push(g.slice(r*6,r*6+6));
   return m;
 }
-const m=buildGrid('OBSCURE');
-const hiCells=new Set([8,15,21]);
-let html='';
-for(let r=0;r<6;r++){
-  for(let c=0;c<6;c++){
-    const idx=r*6+c;
-    const ch=m[r][c];
-    html+=hiCells.has(idx)?`<span class="hl">${ch}</span> `:ch+' ';
-  }
-  html=html.trimEnd()+(r<5?'\n':'');
+function fnd(m,ch){for(let r=0;r<6;r++)for(let c=0;c<6;c++)if(m[r][c]===ch)return[r+1,c+1];return null;}
+function gt(m,r,c){return m[r-1][c-1];}
+function pSh(s){const d=s.replace(/\D/g,'');return(d||'1').split('').map(Number);}
+function svv(v,s){return(((v-1+s)%6)+1);}
+function cT(seq,kw){
+  kw=kw.toUpperCase().replace(/[^A-Z]/g,'')||'A';
+  const L=kw.length,n=seq.length,fr=Math.floor(n/L),rem=n%L;
+  const tbl=Array.from({length:L},()=>[]);
+  let idx=0;const rows=fr+(rem?1:0);
+  for(let r=0;r<rows;r++)for(let c=0;c<L;c++)if(idx<n)tbl[c].push(seq[idx++]);
+  const ord=kw.split('').map((c,i)=>({c,i})).sort((a,b)=>a.c<b.c?-1:a.c>b.c?1:a.i-b.i);
+  const res=[];for(const{i}of ord)res.push(...tbl[i]);
+  return res;
 }
-document.getElementById('previewMatrix').innerHTML=html;
+function enc(txt){
+  const m=bG('OBSCURE'),sh=pSh('719');
+  const clean=txt.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!clean)return'';
+  const rows=[],cols=[];
+  for(const c of clean){const p=fnd(m,c);if(p){rows.push(p[0]);cols.push(p[1]);}}
+  const sr=rows.map((v,i)=>svv(v,sh[i%sh.length]));
+  const sc=cols.map((v,i)=>svv(v,sh[i%sh.length]));
+  const trans=cT([...sr,...sc],'VOID');
+  let ct='';
+  for(let i=0;i<trans.length-1;i+=2)ct+=gt(m,trans[i],trans[i+1]);
+  return ct;
+}
+
+let dd=null;
+document.getElementById('demoInput').addEventListener('input',function(){
+  clearTimeout(dd);
+  const val=this.value.trim();
+  const out=document.getElementById('demoOutput');
+  if(!val){out.textContent='awaiting input...';out.className='demo-output empty';return;}
+  dd=setTimeout(()=>{
+    const ct=enc(val);
+    out.textContent=ct||'awaiting input...';
+    out.className=ct?'demo-output':'demo-output empty';
+  },60);
+});
+
+// ── SCROLL REVEAL ─────────────────────────────────
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 </script>
 </body>
 </html>
