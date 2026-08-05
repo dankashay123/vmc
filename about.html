@@ -6,6 +6,21 @@
 <title>About — Void Matrix</title>
 <meta name="description" content="About Void Matrix — a terminal cipher tool built for personal use.">
 <meta name="theme-color" content="#010103">
+<meta property="og:site_name" content="Void Matrix">
+<meta property="og:title" content="About — Void Matrix">
+<meta property="og:description" content="A personal encryption tool. Classical cipher architecture, terminal aesthetic, no servers.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="About — Void Matrix">
+<meta name="twitter:description" content="A personal encryption tool. Classical cipher architecture, terminal aesthetic, no servers.">
+<meta name="twitter:image" content="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
 .about-lead{
@@ -53,20 +68,21 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">SKIP TO CONTENT</a>
 <div class="cursor" id="cursor"></div>
 
 <nav class="nav">
   <a href="index.html" class="nav-brand">VOID MATRIX</a>
-  <button class="nav-menu-btn" onclick="toggleNav()">☰ MENU</button>
+  <button class="nav-menu-btn" type="button" aria-label="Toggle navigation">☰ MENU</button>
   <div class="nav-links" id="navLinks">
     <a href="index.html" class="nav-link">HOME</a>
     <a href="how-it-works.html" class="nav-link">HOW IT WORKS</a>
     <a href="about.html" class="nav-link active">ABOUT</a>
-    <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
   </div>
+  <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
 </nav>
 
-<div class="page">
+<div class="page" id="main" tabindex="-1">
 
   <div class="page-eyebrow">THE PROJECT</div>
   <h1 class="page-title">About <span>Void Matrix</span></h1>
@@ -123,8 +139,9 @@
       <tr><td>SHARE FORMAT</td><td>VMC-MSG: base64-encoded JSON blob (keys + ciphertext + pass count)</td></tr>
       <tr><td>PLATFORM</td><td>Single-file HTML/JS · no build toolchain · PWA installable</td></tr>
       <tr><td>RUNTIME</td><td>Browser-only · zero network requests during operation</td></tr>
+      <tr><td>THREAT MODEL</td><td>Casual interception · not audited, not for high-threat use</td></tr>
       <tr><td>SOUND</td><td>Web Audio API · ciphertext-derived melody on encrypt</td></tr>
-      <tr><td>VERSION</td><td>v3.0</td></tr>
+      <tr><td>VERSION</td><td data-vmc-version>v3.1</td></tr>
     </table>
   </div>
 
@@ -133,7 +150,8 @@
   <div class="about-section">
     <h2>HONEST LIMITATIONS</h2>
     <p>Void Matrix is a classical cipher. It is not AES, RSA, or any modern cryptographic primitive. It has not been formally audited. It is not recommended for protecting sensitive data in high-threat environments.</p>
-    <p>What it is: a well-designed personal cipher that's genuinely difficult to crack without the keys, built for private communication between people who want something more interesting than sending plaintext — and who want to understand what their tools are actually doing.</p>
+    <p>Concretely: the design sits in the bifid and ADFGVX family, and that family was solved with pencil and paper by the 1940s given enough intercepted traffic under a single key. Void Matrix reuses one key set across a session, so volume is exactly the condition that weakens it. Multi-pass adds diffusion but no additional key material.</p>
+<p>What it is: a well-built personal cipher that will comfortably defeat casual inspection, built for private communication between people who want something more interesting than sending plaintext — and who want to understand what their tools are actually doing. What it is not: protection against a motivated adversary with your ciphertext and time.</p>
     <p>Use it accordingly.</p>
   </div>
 
@@ -146,7 +164,7 @@
 </div>
 
 <footer class="footer">
-  <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
+  <div class="footer-l">VOID MATRIX CIPHER · <span data-vmc-version>v3.1</span></div>
   <div class="footer-r">
     <a href="index.html">HOME</a>
     &nbsp;·&nbsp;
@@ -154,21 +172,6 @@
   </div>
 </footer>
 
-<script>
-function toggleNav(){
-  document.getElementById('navLinks').classList.toggle('open');
-}
-</script>
-<script>
-const cur=document.getElementById("cursor");
-if(cur&&window.matchMedia("(pointer:fine)").matches){
-  document.addEventListener("mousemove",e=>{cur.style.left=e.clientX+"px";cur.style.top=e.clientY+"px";});
-  document.addEventListener("mousedown",()=>cur.classList.add("click"));
-  document.addEventListener("mouseup",()=>cur.classList.remove("click"));
-  document.querySelectorAll("a,button,input").forEach(el=>{el.addEventListener("mouseenter",()=>cur.classList.add("hover"));el.addEventListener("mouseleave",()=>cur.classList.remove("hover"));});
-}else if(cur){cur.style.display="none";}
-const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add("visible");});},{threshold:0.1});
-document.querySelectorAll(".reveal").forEach(el=>obs.observe(el));
-</script>
+<script src="site.js" defer></script>
 </body>
 </html>

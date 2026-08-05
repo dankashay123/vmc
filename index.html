@@ -9,8 +9,18 @@
 <meta property="og:title" content="Void Matrix — Terminal Encryption">
 <meta property="og:description" content="A terminal cipher tool. Three keys. Zero servers. Nothing leaves your device.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Void Matrix">
+<meta property="og:image" content="icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Void Matrix — Terminal Encryption">
+<meta name="twitter:description" content="A terminal cipher tool. Three keys. Zero servers. Nothing leaves your device.">
+<meta name="twitter:image" content="icon-512.png">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
 /* ── HERO ────────────────────────────────────── */
@@ -133,21 +143,22 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">SKIP TO CONTENT</a>
 
 <div class="cursor" id="cursor"></div>
 
 <nav class="nav">
   <a href="index.html" class="nav-brand">VOID MATRIX</a>
-  <button class="nav-menu-btn" onclick="toggleNav()">☰</button>
+  <button class="nav-menu-btn" type="button" aria-label="Toggle navigation">☰ MENU</button>
   <div class="nav-links" id="navLinks">
     <a href="index.html" class="nav-link active">HOME</a>
     <a href="how-it-works.html" class="nav-link">HOW IT WORKS</a>
     <a href="about.html" class="nav-link">ABOUT</a>
-    <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
   </div>
+  <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
 </nav>
 
-<section class="hero">
+<section class="hero" id="main" tabindex="-1">
   <canvas class="hero-canvas" id="heroCanvas"></canvas>
   <div class="corner corner-tl"></div>
   <div class="corner corner-tr"></div>
@@ -156,7 +167,7 @@
   <div class="hero-content">
     <div class="hero-eyebrow">TERMINAL ENCRYPTION TOOL</div>
     <div class="hero-title"><span id="heroVoid">VOID</span><br><span class="acc" id="heroAcc">MATRIX</span></div>
-    <div class="hero-sub">// CIPHER SYSTEM v3.0</div>
+    <div class="hero-sub">// CIPHER SYSTEM <span data-vmc-version>v3.1</span></div>
     <p class="hero-desc">A classical cipher built on a 6×6 Polybius grid and a three-key system. Runs entirely in your browser. No servers. No logs. Nothing leaves your device.</p>
     <div class="hero-actions">
       <a href="cipher.html" class="btn btn-primary">▸ LAUNCH CIPHER</a>
@@ -213,33 +224,18 @@
 </section>
 
 <footer class="footer">
-  <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
+  <div class="footer-l">VOID MATRIX CIPHER · <span data-vmc-version>v3.1</span></div>
   <div class="footer-r">
     <a href="how-it-works.html">HOW IT WORKS</a> &nbsp;·&nbsp;
     <a href="about.html">ABOUT</a>
   </div>
 </footer>
 
+<script src="site.js" defer></script>
 <script>
-// ── CURSOR ───────────────────────────────────────
-const cursor=document.getElementById('cursor');
-if(cursor&&window.matchMedia('(pointer:fine)').matches){
-  document.addEventListener('mousemove',e=>{
-    cursor.style.left=e.clientX+'px';
-    cursor.style.top=e.clientY+'px';
-  });
-  document.addEventListener('mousedown',()=>cursor.classList.add('click'));
-  document.addEventListener('mouseup',()=>cursor.classList.remove('click'));
-  document.querySelectorAll('a,button,input').forEach(el=>{
-    el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
-    el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
-  });
-} else if(cursor){cursor.style.display='none';}
-
-// ── NAV ──────────────────────────────────────────
-function toggleNav(){document.getElementById('navLinks').classList.toggle('open');}
-
 // ── MATRIX RAIN ──────────────────────────────────
+// Skipped entirely when the OS asks for reduced motion.
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
 const canvas=document.getElementById('heroCanvas');
 const ctx=canvas.getContext('2d');
 const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -369,6 +365,7 @@ const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
 },{threshold:0.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
 </script>
 </body>
 </html>

@@ -1,16 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
-
 *{margin:0;padding:0;box-sizing:border-box;}
 
-/* Custom cursor — desktop only */
-*{cursor:none !important;}
-.cursor{
-  position:fixed;pointer-events:none;z-index:99999;
-  width:16px;height:16px;
-  border:1px solid var(--acc);
-  transform:translate(-50%,-50%);
-  transition:width .1s,height .1s,border-color .12s,background .12s;
-  mix-blend-mode:screen;
+/* Custom cursor — fine pointers only.
+   Gated on pointer type rather than viewport width so tablets and
+   touch laptops between 601px and 1024px keep a usable cursor. */
+.cursor{display:none;}
+@media (pointer:fine){
+  *{cursor:none !important;}
+  .cursor{
+    display:block;
+    position:fixed;top:0;left:0;pointer-events:none;z-index:99999;
+    width:16px;height:16px;
+    border:1px solid var(--acc);
+    will-change:transform;
+    transition:width .1s,height .1s,border-color .12s,background .12s,opacity .15s;
+    mix-blend-mode:screen;
+  }
 }
 .cursor::before{
   content:'';position:absolute;top:50%;left:50%;
@@ -27,10 +31,6 @@
 }
 .cursor.hover{width:26px;height:26px;border-color:var(--t3);background:var(--accg);}
 .cursor.click{width:10px;height:10px;background:var(--accg2);}
-@media(max-width:600px){
-  *{cursor:auto !important;}
-  .cursor{display:none;}
-}
 
 :root{
   --void:#010103;--panel:#050709;--win:#070a0d;
@@ -43,8 +43,23 @@
 html,body{
   background:var(--void);color:var(--t3);
   font-family:'Share Tech Mono',monospace;
-  min-height:100vh;overflow-x:hidden;
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
 }
+
+/* Keyboard focus — visible without polluting mouse interaction */
+:focus-visible{
+  outline:1px solid var(--acc);
+  outline-offset:2px;
+}
+
+/* Skip link for keyboard and screen-reader users */
+.skip-link{
+  position:absolute;left:-9999px;top:0;z-index:200;
+  background:var(--acc);color:#000;padding:8px 16px;
+  font-family:'VT323',monospace;font-size:14px;letter-spacing:2px;
+}
+.skip-link:focus{left:0;}
 body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,0.045) 0,rgba(0,0,0,0.045) 1px,transparent 1px,transparent 2px);
@@ -54,7 +69,9 @@ body::after{
 .nav{
   position:sticky;top:0;z-index:100;
   background:rgba(5,7,9,0.96);border-bottom:1px solid var(--bd1);
-  padding:0 40px;height:48px;
+  padding:0 calc(40px + env(safe-area-inset-right)) 0 calc(40px + env(safe-area-inset-left));
+  height:calc(48px + env(safe-area-inset-top));
+  padding-top:env(safe-area-inset-top);
   display:flex;align-items:center;justify-content:space-between;
   backdrop-filter:blur(12px);
 }
@@ -89,21 +106,43 @@ body::after{
   color:var(--t2);font-family:'VT323',monospace;font-size:16px;padding:2px 8px;
 }
 @media(max-width:600px){
-  .nav{padding:0 16px;}
+  .nav{
+    padding:0 calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+    padding-top:env(safe-area-inset-top);
+    gap:8px;
+  }
+  .nav-brand{font-size:19px;letter-spacing:3px;}
   .nav-links{
-    display:none;position:absolute;top:48px;left:0;right:0;
+    display:none;position:absolute;
+    top:calc(48px + env(safe-area-inset-top));left:0;right:0;
     background:var(--panel);border-bottom:1px solid var(--bd1);
     flex-direction:column;gap:0;padding:8px 0;
   }
   .nav-links.open{display:flex;}
-  .nav-link{padding:10px 20px;width:100%;}
-  .nav-launch{display:none;}
-  .nav-menu-btn{display:block;}
+  .nav-link{padding:14px 20px;width:100%;font-size:11px;}
+  /* LAUNCH stays visible — it is the primary action on a mobile-first tool.
+     It now sits outside .nav-links in the markup so collapsing the dropdown
+     no longer takes the primary CTA with it. */
+  .nav-launch{
+    display:inline-flex;align-items:center;
+    font-size:13px;padding:4px 12px;letter-spacing:1px;
+    margin-left:auto;order:2;
+  }
+  .nav-menu-btn{order:3;display:block;min-height:32px;min-width:40px;}
+  .nav-brand{order:1;}
+  .nav-links{order:4;}
 }
 
 /* ── PAGE WRAPPER ────────────────────────────── */
-.page{max-width:900px;margin:0 auto;padding:60px 40px;}
-@media(max-width:600px){.page{padding:32px 16px;}}
+.page{
+  max-width:900px;margin:0 auto;
+  padding:60px calc(40px + env(safe-area-inset-right)) 60px calc(40px + env(safe-area-inset-left));
+}
+@media(max-width:600px){
+  .page{
+    padding:32px calc(16px + env(safe-area-inset-right)) 32px calc(16px + env(safe-area-inset-left));
+  }
+}
 
 /* ── TYPOGRAPHY ──────────────────────────────── */
 .page-eyebrow{
@@ -197,7 +236,12 @@ body::after{
 .footer-r{font-size:8px;letter-spacing:2px;color:var(--t0);}
 .footer-r a{color:var(--t1);text-decoration:none;transition:color .12s;}
 .footer-r a:hover{color:var(--t3);}
-@media(max-width:600px){.footer{padding:24px 16px;flex-direction:column;gap:8px;text-align:center;}}
+@media(max-width:600px){
+  .footer{
+    padding:24px 16px calc(24px + env(safe-area-inset-bottom));
+    flex-direction:column;gap:8px;text-align:center;
+  }
+}
 
 /* ── SCROLL REVEAL ───────────────────────────── */
 .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;}
@@ -210,3 +254,45 @@ body::after{
 
 /* ── FLICKER ─────────────────────────────────── */
 @keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:.97}96.5%{opacity:.99}97.8%{opacity:.95}98.5%{opacity:.98}}
+
+/* ── REDUCED MOTION ──────────────────────────────
+   Scanlines, flicker, reveals and hover transforms all come off for
+   anyone who has asked the OS to reduce motion. The scanline overlay
+   is a fixed repeating gradient over the whole viewport, which is the
+   single most likely element here to cause discomfort, so it goes too. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  body::after{display:none;}
+  .reveal{opacity:1 !important;transform:none !important;}
+  .btn::before{display:none;}
+  .card:hover{box-shadow:none;}
+}
+
+/* ── READABILITY ─────────────────────────────────
+   The terminal look depends on small type, but 7–10px with 1px tracking
+   is past the point of legibility on a phone. These bumps are mobile-only
+   so the desktop composition is untouched. */
+@media (max-width:600px){
+  .page-lead{font-size:13px;line-height:2.0;}
+  .body-text{font-size:12.5px;line-height:2.0;}
+  .about-section p{font-size:12.5px;line-height:2.0;}
+  .card-body{font-size:11.5px;line-height:1.9;}
+  .card-label{font-size:9px;letter-spacing:2px;}
+  .page-eyebrow{font-size:9px;letter-spacing:4px;}
+  .footer-l,.footer-r{font-size:9.5px;}
+  .divider::before{font-size:8.5px;}
+  .accent-block p{font-size:12.5px;line-height:2.0;}
+  .spec-table td{font-size:11px;}
+  .principle-body{font-size:11px;line-height:1.85;}
+}
+
+/* Tap targets: anything interactive clears the 44px minimum on touch */
+@media (pointer:coarse){
+  .nav-link,.nav-launch,.btn{min-height:44px;display:flex;align-items:center;justify-content:center;}
+  .footer-r a{display:inline-block;padding:6px 4px;}
+}

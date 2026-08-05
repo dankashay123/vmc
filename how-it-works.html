@@ -6,6 +6,21 @@
 <title>How It Works — Void Matrix</title>
 <meta name="description" content="A plain-language explanation of the Void Matrix cipher — grids, coordinates, shifts, and transposition.">
 <meta name="theme-color" content="#010103">
+<meta property="og:site_name" content="Void Matrix">
+<meta property="og:title" content="How It Works — Void Matrix">
+<meta property="og:description" content="Grids, coordinates, shifts and transposition, explained in plain language.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How It Works — Void Matrix">
+<meta name="twitter:description" content="Grids, coordinates, shifts and transposition, explained in plain language.">
+<meta name="twitter:image" content="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
 .section{margin-bottom:64px;}
@@ -103,20 +118,21 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">SKIP TO CONTENT</a>
 <div class="cursor" id="cursor"></div>
 
 <nav class="nav">
   <a href="index.html" class="nav-brand">VOID MATRIX</a>
-  <button class="nav-menu-btn" onclick="toggleNav()">☰ MENU</button>
+  <button class="nav-menu-btn" type="button" aria-label="Toggle navigation">☰ MENU</button>
   <div class="nav-links" id="navLinks">
     <a href="index.html" class="nav-link">HOME</a>
     <a href="how-it-works.html" class="nav-link active">HOW IT WORKS</a>
     <a href="about.html" class="nav-link">ABOUT</a>
-    <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
   </div>
+  <a href="cipher.html" class="nav-launch">▸ LAUNCH</a>
 </nav>
 
-<div class="page">
+<div class="page" id="main" tabindex="-1">
 
   <div class="page-eyebrow">DOCUMENTATION</div>
   <h1 class="page-title">How It <span>Works</span></h1>
@@ -323,7 +339,7 @@
 </div>
 
 <footer class="footer">
-  <div class="footer-l">VOID MATRIX CIPHER · v3.0</div>
+  <div class="footer-l">VOID MATRIX CIPHER · <span data-vmc-version>v3.1</span></div>
   <div class="footer-r">
     <a href="index.html">HOME</a>
     &nbsp;·&nbsp;
@@ -331,21 +347,6 @@
   </div>
 </footer>
 
-<script>
-function toggleNav(){
-  document.getElementById('navLinks').classList.toggle('open');
-}
-</script>
-<script>
-const cur=document.getElementById("cursor");
-if(cur&&window.matchMedia("(pointer:fine)").matches){
-  document.addEventListener("mousemove",e=>{cur.style.left=e.clientX+"px";cur.style.top=e.clientY+"px";});
-  document.addEventListener("mousedown",()=>cur.classList.add("click"));
-  document.addEventListener("mouseup",()=>cur.classList.remove("click"));
-  document.querySelectorAll("a,button,input").forEach(el=>{el.addEventListener("mouseenter",()=>cur.classList.add("hover"));el.addEventListener("mouseleave",()=>cur.classList.remove("hover"));});
-}else if(cur){cur.style.display="none";}
-const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add("visible");});},{threshold:0.1});
-document.querySelectorAll(".reveal").forEach(el=>obs.observe(el));
-</script>
+<script src="site.js" defer></script>
 </body>
 </html>

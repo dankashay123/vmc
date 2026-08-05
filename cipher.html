@@ -15,7 +15,21 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="apple-touch-startup-image" href="icon-512.png">
+<link rel="icon" href="icon-192.png" type="image/png">
 
+<!-- Social -->
+<meta property="og:site_name" content="Void Matrix">
+<meta property="og:title" content="Void Matrix Cipher">
+<meta property="og:description" content="Terminal encryption tool. Three keys, six-by-six matrix, zero servers. Nothing leaves your device.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Void Matrix Cipher">
+<meta name="twitter:description" content="Terminal encryption tool. Three keys, six-by-six matrix, zero servers.">
+<meta name="twitter:image" content="icon-512.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* Prevent iOS zoom on input focus — font-size must be ≥16px */
@@ -286,9 +300,47 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 .larrow.o{transform:rotate(90deg);color:var(--t2);}
 .log-tog:hover .larrow{color:var(--t2);}
 .log-body{max-height:0;overflow:hidden;transition:max-height .3s ease;background:#020405;}
-.log-body#instrBody.o{max-height:1800px;}
-.log-body.o{max-height:1200px;border-bottom:1px solid var(--bd0);}
+/* Open panels scroll internally. The previous fixed 1200px/1800px caps with
+   overflow:hidden silently truncated long logs and the HOW TO USE section. */
+.log-body.o{
+  max-height:min(70vh,900px);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  border-bottom:1px solid var(--bd0);
+}
+.log-body#instrBody.o{max-height:min(76vh,1100px);}
 .log-body::-webkit-scrollbar{width:2px;}.log-body::-webkit-scrollbar-thumb{background:var(--bd0);}
+
+/* Keyboard focus */
+:focus-visible{outline:1px solid var(--acc);outline-offset:1px;}
+
+/* Build-update prompt in the status bar */
+.sbar-update{
+  display:none;font-family:'VT323',monospace;font-size:10px;letter-spacing:1px;
+  background:var(--acc);color:#000;border:none;padding:0 8px;cursor:pointer;
+  animation:upd-pulse 2s ease-in-out infinite;
+}
+.sbar-update.show{display:inline-block;}
+@keyframes upd-pulse{0%,100%{opacity:1}50%{opacity:.62}}
+
+/* Honest footnote under the keyspace readout */
+.crack-note{
+  font-size:7px;color:var(--t1);letter-spacing:1px;line-height:1.7;
+  font-family:'Share Tech Mono',monospace;
+  padding:6px 5px 2px;border-top:1px solid var(--bd0);margin-top:4px;
+}
+.crack-note b{color:var(--away);font-weight:normal;}
+
+/* Reduced motion: strip the scanlines, flicker, glitch and pulses. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  .shell::after{display:none;}
+  .shell{animation:none !important;}
+  .tbar::before{display:none;}
+}
 .log-in{padding:6px 10px;}
 .lstep{margin-bottom:7px;padding-left:5px;border-left:1px solid var(--bd0);}
 .lstep-h{font-size:8px;letter-spacing:2px;color:var(--t2);margin-bottom:2px;}
@@ -727,6 +779,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
     <button class="theme-btn" onclick="togTheme(event)">◐ HUE</button>
     <button class="snd-btn" id="dmtBtn" onclick="togDMT()" title="Toggle CYCLIC mode">CYCLIC</button>
     <button class="snd-btn on" id="sndBtn" onclick="togSound()" title="Toggle sound">SND</button>
+    <button class="snd-btn" id="wipeBtn" onclick="panicWipe()" title="Clear keys, message, output and history">WIPE</button>
   </div>
 
   <div class="top-region">
@@ -819,9 +872,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
           <span class="char-warn" id="charWarn"></span>
         </div>
         <div class="pad-row">
-          <span class="pad-lbl">NULL PAD (X)</span>
-          <div class="tog-track" id="padTog" onclick="togglePad()"><div class="tog-thumb"></div></div>
-          <span class="pad-hint" id="padHint">OFF</span>
+          <span class="pad-lbl">EFFECTIVE TRANS KEY</span>
+          <span class="pad-hint" id="effTkHint">-</span>
         </div>
       </div>
       <div class="fix-banner" id="fixBanner">
@@ -965,8 +1017,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
           </div>
 
           <div class="lstep" style="margin-bottom:10px">
-            <div class="lstep-h">// NULL PAD (X)</div>
-            <div class="lstep-c">The cipher processes characters in pairs. If your message has an odd number of valid characters, the last one has no partner and gets dropped. Turning on NULL PAD automatically appends an X to make the count even, so no characters are lost. The recipient will see the X at the end and can ignore it.</div>
+            <div class="lstep-h">// MESSAGE LENGTH</div>
+            <div class="lstep-c">Any length works, odd or even. Each character becomes a row and a column, so the coordinate stream is always even regardless of your message. The old NULL PAD toggle was removed in v3.1 &ndash; it appended an X that survived into the recipient's plaintext, solving a problem the engine never had.</div>
           </div>
 
           <div class="lstep" style="margin-bottom:10px">
@@ -996,7 +1048,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 
           <div class="lstep" style="margin-bottom:10px">
             <div class="lstep-h">// AUTO-FIX: KEY TOO SHORT</div>
-            <div class="lstep-c">If your Transposition Key is too short relative to your message length, repeating patterns can appear in the ciphertext. The app detects this automatically and extends the key using a deterministic algorithm derived from your original key &ndash; so the recipient can reproduce the same extension. The Transposition field updates to show the extended key. A yellow banner explains what changed. The SHARE blob always contains the actual key that was used.</div>
+            <div class="lstep-c">If your Transposition Key is short relative to your message, repeating patterns can appear in the ciphertext. The app extends the key deterministically from your original, and does the same on decrypt &ndash; so your recipient can type the short key you gave them and it will work. Your key field is never overwritten. The EFFECTIVE TRANS KEY readout under the message box shows exactly what will be used, and a yellow banner confirms it after each run.</div>
           </div>
 
           <div class="lstep" style="margin-bottom:10px">
@@ -1006,7 +1058,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 
           <div class="lstep" style="margin-bottom:10px">
             <div class="lstep-h">// INDEX OF COINCIDENCE (IC)</div>
-            <div class="lstep-c">The IC meter appears below the output after each run. It measures character frequency distribution in the ciphertext. FLAT (near 0.0278) means the output looks statistically random &ndash; good. MIXED means partial structure is present. STRUCT means strong patterns remain, which may indicate weak keys or too few passes.</div>
+            <div class="lstep-c">Measures character frequency distribution in the output. FLAT (near 0.0278) means it looks statistically random. MIXED means partial structure. STRUCT means strong patterns remain &ndash; try longer keys or more passes. Below 40 characters the reading is statistical noise, so the meter reports TOO SHORT TO JUDGE rather than a misleading verdict.</div>
           </div>
 
           <div class="lstep" style="margin-bottom:10px">
@@ -1016,7 +1068,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 
           <div class="lstep" style="margin-bottom:10px">
             <div class="lstep-h">// CRACK DIFFICULTY</div>
-            <div class="lstep-c">Open CRACK DIFFICULTY after any run to see the estimated keyspace of your current key combination, broken down by grid permutations, transposition permutations, and shift combinations. Rating: WEAK / MODERATE / STRONG / VOID. Longer keys in all three fields push toward VOID.</div>
+            <div class="lstep-c">Shows the keyspace your current keys actually reach, split into grid, transposition and shift. Grid is scored as P(36,u) where u is the number of unique characters in your Grid Key &ndash; a four-letter key does not reach 36 factorial, and the meter no longer pretends it does. Rating runs WEAK / MODERATE / STRONG / VOID and the defaults sit at MODERATE. The panel also flags dictionary keys and states plainly that keyspace is not the same as security for a classical cipher.</div>
           </div>
 
           <div class="lstep" style="margin-bottom:10px">
@@ -1027,6 +1079,21 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
           <div class="lstep" style="margin-bottom:10px">
             <div class="lstep-h">// GROUP 5 &amp; EXPORT</div>
             <div class="lstep-c">After encrypting, two buttons appear below the output. GROUP 5 splits the ciphertext into space-separated 5-character blocks &ndash; traditional tradecraft format, easier to read and transcribe. EXPORT downloads a .txt dossier containing your keys, IC score, crack rating, full ciphertext, and the VMC-MSG blob for archiving or offline handoff.</div>
+          </div>
+
+          <div class="lstep" style="margin-bottom:10px">
+            <div class="lstep-h">// SEND AS A LINK</div>
+            <div class="lstep-c">Blobs are URL-safe. Append one to the app address as a fragment &ndash; <span class="hi">cipher.html#VMC-MSG:...</span> &ndash; and opening that link loads the keys and decrypts on arrival. The fragment is stripped from the address bar immediately so the key material is not left sitting in history. Anyone with the link has the keys, so treat it exactly like handing over the blob itself.</div>
+          </div>
+
+          <div class="lstep" style="margin-bottom:10px">
+            <div class="lstep-h">// WIPE</div>
+            <div class="lstep-c">The WIPE button in the title bar clears all three keys, the message, the output, the share field, the pass count and the full session history in one tap, and makes a best-effort attempt to blank the clipboard. Use it when handing your phone to someone or stepping away mid-transmission.</div>
+          </div>
+
+          <div class="lstep" style="margin-bottom:10px">
+            <div class="lstep-h">// NEW BUILD PROMPT</div>
+            <div class="lstep-c">When a newer version is deployed, a NEW BUILD button appears in the status bar. Tapping it reloads into the new version. The app never swaps itself out mid-message &ndash; the update waits for you.</div>
           </div>
 
           <div class="lstep" style="margin-bottom:10px">
@@ -1043,7 +1110,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 
   <div class="sbar">
     <div class="sbar-l" id="sbl">● IDLE</div>
-    <div class="sbar-r" id="sbr" title="^Enter=run  ^R=roll  ^⇧C=copy  ^D=mode">VOID MATRIX v3.0</div>
+    <button class="sbar-update" id="updBtn" onclick="applyUpdate()" title="A newer build is cached. Tap to reload.">NEW BUILD ▸ RELOAD</button>
+    <div class="sbar-r" id="sbr" title="^Enter=run  ^R=roll  ^⇧C=copy  ^D=mode">VOID MATRIX</div>
   </div>
 
 </div>
@@ -1073,6 +1141,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 // CIPHER ENGINE - 6x6 (A-Z + 0-9, I and J distinct)
 // ═══════════════════════════════════════════════
 
+const VMC_VERSION='v3.1';
 const GRID_SZ=6;
 const ALPHABET='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; // 36 chars, I and J are distinct
 
@@ -1191,6 +1260,34 @@ function flashBtn(id,ok){
   setTimeout(()=>btn.classList.remove('flash-ok','flash-err'),600);
 }
 
+// ── Blob codec ────────────────────────────────────────────────────────────
+// btoa() is Latin-1 only, so any key outside that range threw. SEANCE is in
+// the built-in wordlist and any emoji or CJK key would hard-fail. This is
+// UTF-8 safe and URL-safe, so blobs also survive being pasted into a link.
+function b64uEncode(str){
+  const bytes=new TextEncoder().encode(str);
+  let bin='';
+  bytes.forEach(b=>{bin+=String.fromCharCode(b);});
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64uDecode(str){
+  let t=str.replace(/-/g,'+').replace(/_/g,'/');
+  while(t.length%4) t+='=';
+  const bin=atob(t);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  try{ return new TextDecoder('utf-8',{fatal:true}).decode(bytes); }
+  catch(e){ return bin; } // legacy blobs written with raw btoa()
+}
+function makeBlob(gk,tk,ss,ct,passes){
+  return 'VMC-MSG:'+b64uEncode(JSON.stringify([gk,tk,ss,ct,passes]));
+}
+function readBlob(v){
+  const parts=JSON.parse(b64uDecode(v.slice(8)));
+  if(!Array.isArray(parts)||parts.length<4) throw Error('bad blob');
+  return parts;
+}
+
 function encodeMsg(){
   const ct=document.getElementById('outBox').dataset.val||'';
   const gk=document.getElementById('gk').value.trim()||'OBSCURE';
@@ -1202,7 +1299,7 @@ function encodeMsg(){
     kpMsg('✗ ENCRYPT SOMETHING FIRST','var(--dim-r)');
     return;
   }
-  const blob='VMC-MSG:'+btoa(JSON.stringify([gk,tk,ss,ct,passes]));
+  const blob=makeBlob(gk,tk,ss,ct,passes);
   document.getElementById('shareInp').value=blob;
   fallbackCopy(blob,null);
   flashBtn('shareBtnEnc',true);
@@ -1217,8 +1314,7 @@ function decodeMsg(){
     return;
   }
   try{
-    const parts=JSON.parse(atob(v.slice(8)));
-    if(!Array.isArray(parts)||parts.length<4)throw Error();
+    const parts=readBlob(v);
     const[gk,tk,ss,ct,passes=1]=parts;
     document.getElementById('gk').value=gk;
     document.getElementById('tk').value=tk;
@@ -1243,7 +1339,7 @@ function decodeMsg(){
     // Scroll cipher area down to show output
     setTimeout(()=>{
       const outBox=document.getElementById('outBox');
-      if(outBox) outBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+      if(outBox&&outBox.scrollIntoView) outBox.scrollIntoView({behavior:'smooth',block:'nearest'});
     },80);
   }catch(e){
     flashBtn('shareBtnLoad',false);
@@ -1387,6 +1483,8 @@ function applyHue(h){
   r.setProperty('--accg',`rgba(${rv},${gv},${bv},0.11)`);
   r.setProperty('--accg2',`rgba(${rv},${gv},${bv},0.22)`);
   document.getElementById('hueSlider').value=h;
+  // Do not persist while CYCLIC is animating the hue every 40ms
+  if(typeof savePref==='function'&&!(typeof dmtActive!=='undefined'&&dmtActive)) savePref('hue',h);
   // update active preset
   document.querySelectorAll('.preset').forEach(p=>p.classList.toggle('active',parseInt(p.dataset.h)===h));
 }
@@ -1422,16 +1520,15 @@ function initTheme(){
 }
 
 // ═══════════════════════════════════════════════
-// NULL PAD
+// NULL PAD — REMOVED in v3.1
 // ═══════════════════════════════════════════════
-
-let padEnabled=false;
-function togglePad(){
-  padEnabled=!padEnabled;
-  document.getElementById('padTog').classList.toggle('on',padEnabled);
-  document.getElementById('padHint').textContent=padEnabled?'ON - X appended if odd':'OFF';
-  updateCharCount();
-}
+// The 6x6 engine fractionates n characters into 2n coordinates, which is
+// always even, so odd-length messages round-trip cleanly (verified across
+// lengths 1-40). The old toggle appended an X that survived into the
+// recipient's plaintext, i.e. it corrupted the message to solve a problem
+// that did not exist. The stub below keeps any stale reference harmless.
+const padEnabled=false;
+function togglePad(){}
 
 // ═══════════════════════════════════════════════
 // ROLL KEYS
@@ -1479,16 +1576,26 @@ function updateCharCount(){
   document.getElementById('charCount').textContent=`${total} CHARS · ${valid} VALID`;
 
   const warn=document.getElementById('charWarn');
+  // Odd lengths are fine — no warning. The remaining check is the one that
+  // still matters: a transposition key short enough to repeat visibly. The
+  // auto-extender handles it, so this is informational rather than a defect.
   if(valid===0){
     warn.textContent=''; warn.classList.remove('show');
-  } else if(valid%2!==0){
-    warn.textContent=padEnabled?'X WILL BE APPENDED':'⚠ ODD LENGTH · LAST CHAR DROPPED'; warn.classList.add('show');
-  } else if(valid<tkLen*2){
-    warn.textContent=`⚠ SHORT FOR KEY LENGTH (${tkLen})`; warn.classList.add('show');
-  } else if(valid>tkLen*12){
-    warn.textContent=`⚠ TRANS KEY SHORT FOR MSG - PATTERNS MAY SHOW`; warn.classList.add('show');
+  } else if(valid<4){
+    warn.textContent='⚠ VERY SHORT MESSAGE · WEAK DIFFUSION'; warn.classList.add('show');
+  } else if(valid>tkLen*8){
+    const eff=extendKey(tk,valid);
+    warn.textContent=eff.extended?`KEY AUTO-EXTENDS TO ${eff.key.length} CHARS`:'';
+    warn.classList.toggle('show',!!warn.textContent);
   } else {
     warn.textContent=''; warn.classList.remove('show');
+  }
+  // Live readout of the key that will actually be used
+  const effEl=document.getElementById('effTkHint');
+  if(effEl){
+    const eff=extendKey(tk,Math.max(1,valid));
+    effEl.textContent=eff.extended?`${eff.orig} → ${eff.key}`:eff.key;
+    effEl.style.color=eff.extended?'var(--away)':'var(--t1)';
   }
 }
 
@@ -1509,26 +1616,50 @@ function kpMsg(msg,col){
 function log10fac(n){let s=0;for(let i=2;i<=n;i++)s+=Math.log10(i);return s;}
 function fmtSci(v){const e=Math.floor(v),m=Math.pow(10,v-e);return`${m.toFixed(1)}×10<sup>${e}</sup>`;}
 
+// log10 of P(n,k) = n!/(n-k)! — the number of distinct grid layouts a key
+// with k unique characters can actually produce.
+function log10perm(n,k){let s=0;for(let i=0;i<k;i++)s+=Math.log10(n-i);return s;}
+
 function calcCrack(gk,tk,ss){
+  const gkC=(gk||'OBSCURE').toUpperCase().replace(/[^A-Z0-9]/g,'');
   const tkC=(tk||'VOID').toUpperCase().replace(/[^A-Z]/g,'');
   const ssC=(ss||'719').replace(/\D/g,'');
-  const gL=log10fac(36),tL=log10fac(Math.max(1,tkC.length)),sL=Math.max(1,ssC.length);
+
+  // Grid: the old model claimed 36! (10^41.6) regardless of key. That was
+  // wrong — the layout is fully determined by the key's unique characters,
+  // so the reachable space is P(36,u), not 36!. With u=36 this still tops
+  // out at 36!, but a 4-letter key is now correctly scored near 10^6.
+  const U=Math.min(36,Math.max(1,new Set(gkC).size));
+  const L=Math.max(1,tkC.length);
+  const N=Math.max(1,ssC.length);
+
+  const gL=log10perm(36,U);
+  const tL=log10fac(L);
+  const sL=N;
   const tot=gL+tL+sL;
-  const L=Math.max(1,tkC.length),N=Math.max(1,ssC.length);
+
   let rating,rc,bar;
-  if(tot<15){rating='WEAK';rc='w';bar=15;}
-  else if(tot<22){rating='MODERATE';rc='m';bar=40;}
-  else if(tot<30){rating='STRONG';rc='s';bar=72;}
+  if(tot<8){rating='WEAK';rc='w';bar=12;}
+  else if(tot<16){rating='MODERATE';rc='m';bar=38;}
+  else if(tot<28){rating='STRONG';rc='s';bar=70;}
   else{rating='VOID';rc='v';bar=100;}
+
+  // Dictionary keys collapse the real search space far below the structural
+  // figure, so say so rather than quietly inflating the score.
+  const dictHit=WORDLIST.includes(gkC)||WORDLIST.includes(tkC);
+
   document.getElementById('crackIn').innerHTML=
-    `<div class="lstep"><div class="lstep-h">GRID (36!)</div><div class="lstep-c"><span class="hi">${fmtSci(gL)}</span></div></div>`+
-    `<div class="lstep"><div class="lstep-h">TRANS (${L}!)</div><div class="lstep-c"><span class="hi">${fmtSci(tL)}</span></div></div>`+
-    `<div class="lstep"><div class="lstep-h">SHIFT (10<sup>${N}</sup>)</div><div class="lstep-c"><span class="hi">${fmtSci(sL)}</span></div></div>`+
+    `<div class="lstep"><div class="lstep-h">GRID · P(36,${U}) from ${U} unique key chars</div><div class="lstep-c"><span class="hi">${fmtSci(gL)}</span></div></div>`+
+    `<div class="lstep"><div class="lstep-h">TRANS · ${L}! column orders</div><div class="lstep-c"><span class="hi">${fmtSci(tL)}</span></div></div>`+
+    `<div class="lstep"><div class="lstep-h">SHIFT · 10<sup>${N}</sup> sequences</div><div class="lstep-c"><span class="hi">${fmtSci(sL)}</span></div></div>`+
     `<div class="lstep"><div class="lstep-h">COMBINED KEYSPACE</div><div class="lstep-c" style="font-size:10px;color:var(--t3)">${fmtSci(tot)}</div></div>`+
-    `<div style="padding:0 0 4px 5px;display:flex;align-items:center;gap:6px"><div style="flex:1;height:3px;background:var(--bd0)"><div style="height:100%;width:${bar}%;background:var(--acc);box-shadow:0 0 5px var(--acc);transition:width .4s"></div></div><span style="font-size:12px;letter-spacing:2px;font-family:'VT323',monospace" class="crack-tag ${rc}">${rating}</span></div>`;
+    `<div style="padding:0 0 4px 5px;display:flex;align-items:center;gap:6px"><div style="flex:1;height:3px;background:var(--bd0)"><div style="height:100%;width:${bar}%;background:var(--acc);box-shadow:0 0 5px var(--acc);transition:width .4s"></div></div><span style="font-size:12px;letter-spacing:2px;font-family:'VT323',monospace" class="crack-tag ${rc}">${rating}</span></div>`+
+    `<div class="crack-note">`+
+      (dictHit?`<b>⚠ DICTIONARY KEY DETECTED.</b> A key taken from a word list is searchable in roughly 10<sup>4</sup> guesses regardless of the figure above. Use ROLL plus your own edits.<br><br>`:``)+
+      `<b>Keyspace is not security.</b> This is a classical cipher: Polybius fractionation, columnar transposition and cyclic shift. That family yields to statistical analysis given enough traffic under one key, no brute force required. Treat the rating as key hygiene, not a strength guarantee.`+
+    `</div>`;
   const cp=document.getElementById('crackPreview');
   if(cp) cp.textContent=rating;
-  const cb=document.getElementById('crackBody'),ca=document.getElementById('crackArrow');
 }
 
 // ═══════════════════════════════════════════════
@@ -1560,7 +1691,7 @@ function resetOut(){
   const b=document.getElementById('outBox');
   b.innerHTML='<span class="out-ph">awaiting transmission...</span><button class="out-copy disabled" id="cpyBtn" onclick="doCopy()">COPY</button>';
   b.dataset.val='';
-  setStat('IDLE','VOID MATRIX v3.0');
+  setStat('IDLE','VOID MATRIX '+VMC_VERSION);
   document.getElementById('logIn').innerHTML='<div class="lstep-c" style="color:var(--t0)">// no transmission recorded</div>';
   document.getElementById('crackIn').innerHTML='<div class="lstep-c" style="color:var(--t0)">// run cipher to calculate</div>';
   const lp=document.getElementById('logPreview'); if(lp) lp.textContent='';
@@ -1721,6 +1852,18 @@ function renderIC(text){
   const ic=calcIC(text);
   if(ic===null){row.style.display='none';return;}
 
+  // IC on a short string is noise. Below ~40 characters a perfectly good
+  // ciphertext will read STRUCT at random, which looks like a failure.
+  const clean=cleanInput(text);
+  if(clean.length<40){
+    document.getElementById('icVal').textContent=ic.toFixed(4);
+    const t=document.getElementById('icTag');
+    t.textContent='· TOO SHORT TO JUDGE';t.className='ic-tag';
+    t.style.color='var(--t1)';
+    row.style.display='flex';
+    return;
+  }
+  document.getElementById('icTag').style.color='';
   const RAND_IC=1/36;
   document.getElementById('icVal').textContent=ic.toFixed(4);
 
@@ -1794,7 +1937,7 @@ function exportDossier(){
   dossier.push('┗'+sep+'┛');
   dossier.push('');
   dossier.push('VMC-MSG BLOB (paste into LOAD field):');
-  dossier.push('VMC-MSG:'+btoa(JSON.stringify([gk,tk,ss,ct,passes])));
+  dossier.push(makeBlob(gk,tk,ss,ct,passes));
 
   const text=dossier.join('\n');
 
@@ -1944,7 +2087,7 @@ function showQR(){
 
   if(!ct){kpMsg('✗ ENCRYPT SOMETHING FIRST','var(--dim-r)');return;}
 
-  const blob='VMC-MSG:'+btoa(JSON.stringify([gk,tk,ss,ct,passes]));
+  const blob=makeBlob(gk,tk,ss,ct,passes);
 
   if(blob.length>2953){
     document.getElementById('qrOverlay').classList.add('open');
@@ -1964,7 +2107,8 @@ function showQR(){
   try{
     new QRCode(tmp,{
       text:blob,width:200,height:200,
-      colorDark:'#00e044',colorLight:'#010103',
+      colorDark:getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#00e044',
+      colorLight:'#010103',
       correctLevel:QRCode.CorrectLevel.M
     });
     setTimeout(()=>{
@@ -2079,6 +2223,8 @@ function showFixBanner(lines){
   document.getElementById('fixBannerBody').innerHTML=lines.join('<br>');
   b.classList.add('show');
 }
+// Key names come from user input, so escape before they reach innerHTML.
+function hiw(v){return `<span class="hiw">${esc(v)}</span>`;}
 function hideFixBanner(){
   document.getElementById('fixBanner').classList.remove('show');
 }
@@ -2095,20 +2241,20 @@ function go(){
 
   const fixes=[];
 
-  // ── Null padding ──
-  if(padEnabled&&mode==='enc'){
-    const valid=cleanInput(raw);
-    if(valid.length%2!==0){raw=raw+'X';fixes.push('ODD LENGTH → appended <span class="hiw">X</span> to complete final pair');}
-  }
-
   // ── Auto-extend transposition key ──
-  if(mode==='enc'){
+  // Applied in BOTH directions now. Ciphertext length equals plaintext
+  // length, so encrypt and decrypt derive an identical extension from the
+  // same short key. That means a recipient can type the original key and
+  // decrypt successfully — previously extension ran on encrypt only, so
+  // manual decryption with the real key silently produced garbage.
+  // The input field is no longer overwritten; the extension is shown
+  // instead, so the user never loses the key they chose.
+  {
     const validLen=cleanInput(raw).length;
     const{key,extended,orig}=extendKey(tk,validLen);
     if(extended){
-      fixes.push(`TRANS KEY <span class="hiw">${orig}</span> too short for ${validLen} chars → extended to <span class="hiw">${key}</span>`);
+      fixes.push(`TRANS KEY ${hiw(orig)} is short for ${validLen} chars → using ${hiw(key)} for this run. Your key is unchanged; the recipient derives the same extension from ${hiw(orig)}.`);
       tk=key;
-      document.getElementById('tk').value=key;
     }
   }
 
@@ -2250,7 +2396,7 @@ function go(){
 }
 
 document.getElementById('gk').addEventListener('input',function(){renderGrid(buildGrid(this.value||'OBSCURE'));updateKeyStrength();});
-document.getElementById('tk').addEventListener('input',updateKeyStrength);
+document.getElementById('tk').addEventListener('input',()=>{updateKeyStrength();updateCharCount();});
 document.getElementById('ss').addEventListener('input',updateKeyStrength);
 document.getElementById('inp').addEventListener('input',updateCharCount);
 document.getElementById('inp').addEventListener('paste',()=>setTimeout(updateCharCount,0));
@@ -2344,6 +2490,7 @@ function togSound(){
   btn.classList.toggle('on',soundEnabled);
   btn.textContent=soundEnabled?'SND':'MUTE';
   btn.style.opacity='1';
+  if(typeof savePref==='function') savePref('sound',soundEnabled);
 }
 
 function getCtx(){
@@ -2509,7 +2656,12 @@ function dmtTick(){
 }
 
 function togDMT(){
+  const wasActive=dmtActive;
   dmtActive=!dmtActive;
+  if(wasActive&&typeof loadPrefs==='function'){
+    const p=loadPrefs();
+    if(typeof p.hue==='number') setTimeout(()=>applyHue(p.hue),0);
+  }
   const btn=document.getElementById('dmtBtn');
   const shell=document.querySelector('.shell');
 
@@ -2606,9 +2758,8 @@ function startRX(){
     return;
   }
   let parts;
-  try{parts=JSON.parse(atob(v.slice(8)));}
+  try{parts=readBlob(v);}
   catch(e){kpMsg('✗ CORRUPT BLOB','var(--dim-r)');return;}
-  if(!Array.isArray(parts)||parts.length<4){kpMsg('✗ INVALID BLOB','var(--dim-r)');return;}
 
   const[gk,tk,ss,ct,passes=1]=parts;
 
@@ -2841,16 +2992,122 @@ function glitchResolveTitle(onComplete){
   },620);
 }
 
+// ═══════════════════════════════════════════════
+// PREFERENCE PERSISTENCE
+// ═══════════════════════════════════════════════
+// Hue and sound reset on every launch previously. Keys and messages are
+// deliberately never stored — only display preferences.
+const PREF_KEY='vmc.prefs';
+function loadPrefs(){
+  try{ return JSON.parse(localStorage.getItem(PREF_KEY))||{}; }
+  catch(e){ return {}; }
+}
+function savePref(k,v){
+  try{
+    const p=loadPrefs(); p[k]=v;
+    localStorage.setItem(PREF_KEY,JSON.stringify(p));
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════════
+// PANIC WIPE
+// ═══════════════════════════════════════════════
+function panicWipe(){
+  ['gk','tk','ss','inp','shareInp'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('passInp').value='1';
+  document.getElementById('passHint').textContent='single pass';
+  blobPasses=null;
+  msgHistory.length=0;
+  renderHistory();
+  const hp=document.getElementById('histPreview'); if(hp) hp.textContent='';
+  hideFixBanner();
+  resetOut();
+  hideErr();
+  document.getElementById('charCount').textContent='0 CHARS · 0 VALID';
+  const cw=document.getElementById('charWarn');
+  cw.textContent=''; cw.classList.remove('show');
+  const eff=document.getElementById('effTkHint'); if(eff) eff.textContent='-';
+  renderGrid(buildGrid('OBSCURE'));
+  updateKeyStrength();
+  // Best-effort clipboard scrub so the last ciphertext is not left behind
+  try{ if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(''); }catch(e){}
+  kpMsg('▓ WIPED — KEYS, MESSAGE, OUTPUT, HISTORY','var(--away)');
+  sndError();
+}
+
+// ═══════════════════════════════════════════════
+// LINK LOADING  (#VMC-MSG:...)
+// ═══════════════════════════════════════════════
+// Blobs are URL-safe base64 now, so a transmission can be sent as a plain
+// link. Opening it drops the blob in the field and decrypts immediately.
+function loadFromHash(){
+  const h=decodeURIComponent((location.hash||'').replace(/^#/,'')).trim();
+  if(!h.startsWith('VMC-MSG:')) return;
+  document.getElementById('shareInp').value=h;
+  // Clear the fragment so the key material is not left in the address bar
+  history.replaceState(null,'',location.pathname+location.search);
+  setTimeout(()=>decodeMsg(),260);
+}
+
+// ═══════════════════════════════════════════════
+// BUILD UPDATES
+// ═══════════════════════════════════════════════
+let waitingWorker=null;
+function applyUpdate(){
+  if(waitingWorker){ waitingWorker.postMessage('SKIP_WAITING'); }
+  else { location.reload(); }
+}
+function watchForUpdates(reg){
+  if(reg.waiting){ waitingWorker=reg.waiting; showUpdatePrompt(); }
+  reg.addEventListener('updatefound',()=>{
+    const nw=reg.installing;
+    if(!nw) return;
+    nw.addEventListener('statechange',()=>{
+      if(nw.state==='installed'&&navigator.serviceWorker.controller){
+        waitingWorker=nw; showUpdatePrompt();
+      }
+    });
+  });
+}
+function showUpdatePrompt(){
+  const b=document.getElementById('updBtn');
+  if(b) b.classList.add('show');
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
 renderGrid(buildGrid('OBSCURE'));
 updateKeyStrength();
+updateCharCount();
 initTheme();
-// Fire title animation on load
+
+(function bootPrefs(){
+  const p=loadPrefs();
+  if(typeof p.hue==='number') applyHue(p.hue);
+  if(p.sound===false&&typeof togSound==='function') togSound();
+})();
+
 setTimeout(()=>glitchResolveTitle(),300);
+loadFromHash();
+window.addEventListener('hashchange',loadFromHash);
 
 // Register service worker for PWA offline support
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      watchForUpdates(reg);
+      // Check for a new build whenever the app is brought back to the front
+      document.addEventListener('visibilitychange',()=>{
+        if(document.visibilityState==='visible') reg.update().catch(()=>{});
+      });
+    }).catch(()=>{});
+    let reloading=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(reloading) return; reloading=true; location.reload();
+    });
   });
 }
 </script>

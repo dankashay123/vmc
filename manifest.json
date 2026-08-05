@@ -1,24 +1,25 @@
 {
+  "id": "/void-matrix-cipher",
   "name": "Void Matrix Cipher",
   "short_name": "VMC",
-  "description": "Terminal encryption tool — Void Matrix Cipher",
+  "description": "Terminal encryption tool — Polybius fractionation, columnar transposition, cyclic shifting. Runs entirely offline in the browser.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "./cipher.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#010103",
   "theme_color": "#010103",
+  "categories": ["utilities", "productivity", "security"],
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icon-192.png",          "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png",          "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "New transmission", "short_name": "Encrypt", "url": "./cipher.html" },
+    { "name": "How it works",     "short_name": "Docs",    "url": "./how-it-works.html" }
   ]
 }
