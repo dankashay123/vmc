@@ -113,7 +113,7 @@
         <button class="share-btn" id="shareBtnQR" data-act="qr">QR</button>
         <button class="share-btn" id="shareBtnRX" data-act="rx">RX</button>
       </div>
-      <div class="share-warn">&#9888; A blob carries the KEYS alongside the ciphertext. Anyone who intercepts one reads the message. Hand keys over out of band and send only the ciphertext when the channel is not trusted.</div>
+      <div class="share-warn" title="A blob is encoded, not encrypted. It contains your three keys in recoverable form, so anyone who intercepts one decrypts the message in a single click. Use it on a channel you already trust; otherwise hand the keys over out of band and send only the ciphertext.">&#9888; <b>BLOB CARRIES YOUR KEYS</b> &middot; only as safe as the channel</div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div class="pass-row">
           <span class="pass-lbl">PASSES</span>

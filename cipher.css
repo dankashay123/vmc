@@ -68,7 +68,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 }
 
 /* Top scrollable region */
-.top-region{overflow-y:auto;overflow-x:hidden;flex-shrink:0;scrollbar-width:thin;scrollbar-color:var(--bd1) transparent;}
+/* KEYS + MATRIX. This is reference material and it already scrolls, so it
+   is the region that yields when the window is short. It used to be
+   flex-shrink:0, which meant it always claimed its full content height and
+   .cipher-area absorbed every pixel of shortfall -- the panels collapsed to
+   nothing, then the output box was clipped, then the ENCRYPT button itself,
+   with no way to reach any of it because .shell is overflow:hidden. Letting
+   it shrink costs nothing at comfortable heights (flex-shrink only applies
+   when the container overflows) and keeps the controls reachable at any
+   size or zoom level. */
+.top-region{overflow-y:auto;overflow-x:hidden;flex:0 100 auto;min-height:58px;scrollbar-width:thin;scrollbar-color:var(--bd1) transparent;}
 .top-region::-webkit-scrollbar{width:2px;}.top-region::-webkit-scrollbar-thumb{background:var(--bd1);}
 
 /* Sections */
@@ -160,9 +169,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 /* Share blob */
 .share-warn{
   margin-top:4px;font-family:'Share Tech Mono',monospace;font-size:7px;
-  letter-spacing:1px;line-height:1.5;color:var(--away);
-  border-left:2px solid var(--away);padding:3px 0 3px 5px;
+  letter-spacing:1px;line-height:1.4;color:var(--away);
+  border-left:2px solid var(--away);padding:2px 0 2px 5px;
 }
+.share-warn b{color:var(--away);}
 .share-row{display:flex;gap:4px;margin-top:5px;}
 .share-inp{flex:1;background:#020405;border:1px solid var(--bd0);color:var(--t2);font-family:'Share Tech Mono',monospace;padding:3px 5px;outline:none;letter-spacing:1px;min-width:0;}
 .share-inp::placeholder{color:var(--t0);}
@@ -222,12 +232,23 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 .hue-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:0;outline:none;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer;}
 .hue-slider::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:#fff;border:1px solid #000;cursor:pointer;}
 .hue-slider::-moz-range-thumb{width:10px;height:10px;background:#fff;border:1px solid #000;cursor:pointer;border-radius:0;}
-.cipher-area{flex:1;display:flex;flex-direction:column;background:var(--win);min-height:0;overflow:hidden;}
+/* Holds the message input, the ENCRYPT button and the output. flex-basis is
+   0, so it takes whatever height is left after .top-region -- which is the
+   right behaviour when there is room, and leaves the full 6x6 matrix
+   visible. When there is not enough room it is a trap: .shell is
+   overflow:hidden, so the leftover being smaller than the contents meant the
+   panels vanished, then the output box, then ENCRYPT itself, with no way to
+   scroll to any of it. The @media (max-height) block near the end of this
+   file gives it a content floor on short windows, which pushes the shortfall
+   onto .top-region instead. See that rule for the details. */
+.cipher-area{flex:1 1 0%;display:flex;flex-direction:column;background:var(--win);min-height:0;overflow:hidden;}
 .cipher-head{
   background:var(--panel);border-bottom:1px solid var(--bd1);
   padding:5px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;z-index:10;
 }
-.cipher-panels{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--bd1) transparent;}
+/* min-height:0 so this can actually shrink below its content height in a
+   flex column rather than pushing its siblings out. */
+.cipher-panels{flex:1 1 0%;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--bd1) transparent;}
 .cipher-panels::-webkit-scrollbar{width:2px;}.cipher-panels::-webkit-scrollbar-thumb{background:var(--bd1);}
 .cipher-name{
   font-size:11px;color:var(--t3);letter-spacing:3px;flex:1;
@@ -729,6 +750,27 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
     border-radius:0 !important;
   }
 }
+/* Short windows, and zoomed-in views (zoom shrinks the CSS viewport, so this
+   is also the WCAG 1.4.10 reflow case).
+
+   Above this height the leftover space is enough for the message box, the
+   ENCRYPT button and the output, so the layout is left exactly as it is and
+   the keys and full matrix stay visible without scrolling.
+
+   Below it there is not enough to go around, and .shell being overflow:hidden
+   meant the overflow was silently unreachable -- the collapsible panels
+   collapsed to nothing, then the output box was cut off, then ENCRYPT itself,
+   which left no way to run the cipher at all. Giving .cipher-area a content
+   floor turns that shortfall into negative free space, which .top-region
+   absorbs: it has a shrink factor of 100 and already scrolls, so KEYS and the
+   matrix stay reachable by scrolling while the controls keep their space.
+
+   Shrink order end to end: collapsible panels, then the keys/matrix region
+   down to its 58px floor, and the controls last. */
+@media (max-height: 840px){
+  .cipher-area{min-height:min-content;}
+}
+
 /* Desktop: phone shell centered with padding */
 @media(min-width:601px){
   .cipher-page-wrap{padding:32px 20px;background:var(--void);}
