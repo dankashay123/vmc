@@ -2116,6 +2116,18 @@ initTheme();
   if(p.sound===false&&typeof togSound==='function') togSound();
 })();
 
+// On the wide layout the analysis panels get a column to themselves, so open
+// the cheap ones rather than presenting a stack of closed headers. The
+// transmission log deliberately stays shut: it is the one panel whose content
+// grows with the message length, and queueLog() only builds it on demand.
+// Clicking the real toggles keeps the arrow state and the JS in agreement.
+if(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches){
+  ['freq','crack'].forEach(act=>{
+    const t=document.querySelector(`[data-act="${act}"]`);
+    if(t) t.click();
+  });
+}
+
 setTimeout(()=>glitchResolveTitle(),300);
 loadFromHash();
 window.addEventListener('hashchange',loadFromHash);

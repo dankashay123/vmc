@@ -68,15 +68,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 }
 
 /* Top scrollable region */
-/* KEYS + MATRIX. This is reference material and it already scrolls, so it
-   is the region that yields when the window is short. It used to be
-   flex-shrink:0, which meant it always claimed its full content height and
-   .cipher-area absorbed every pixel of shortfall -- the panels collapsed to
-   nothing, then the output box was clipped, then the ENCRYPT button itself,
-   with no way to reach any of it because .shell is overflow:hidden. Letting
-   it shrink costs nothing at comfortable heights (flex-shrink only applies
-   when the container overflows) and keeps the controls reachable at any
-   size or zoom level. */
+/* KEYS + MATRIX: reference material, so it is the region that yields when
+   space is tight. Both layout modes override the sizing (see LAYOUT MODES
+   at the end of this file) -- this is the shared base. */
 .top-region{overflow-y:auto;overflow-x:hidden;flex:0 100 auto;min-height:58px;scrollbar-width:thin;scrollbar-color:var(--bd1) transparent;}
 .top-region::-webkit-scrollbar{width:2px;}.top-region::-webkit-scrollbar-thumb{background:var(--bd1);}
 
@@ -232,15 +226,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 .hue-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:0;outline:none;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer;}
 .hue-slider::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:#fff;border:1px solid #000;cursor:pointer;}
 .hue-slider::-moz-range-thumb{width:10px;height:10px;background:#fff;border:1px solid #000;cursor:pointer;border-radius:0;}
-/* Holds the message input, the ENCRYPT button and the output. flex-basis is
-   0, so it takes whatever height is left after .top-region -- which is the
-   right behaviour when there is room, and leaves the full 6x6 matrix
-   visible. When there is not enough room it is a trap: .shell is
-   overflow:hidden, so the leftover being smaller than the contents meant the
-   panels vanished, then the output box, then ENCRYPT itself, with no way to
-   scroll to any of it. The @media (max-height) block near the end of this
-   file gives it a content floor on short windows, which pushes the shortfall
-   onto .top-region instead. See that rule for the details. */
+/* Holds the message input, the ENCRYPT button and the output.
+
+   These flex rules are the base that both layout modes build on; see the
+   LAYOUT MODES block at the end of this file, which is what actually
+   governs on any real window. Both modes override the sizing here: the
+   stacked one lets the page scroll, the wide one makes this a grid cell
+   with its own scroll. Neither can clip its contents, which the fixed
+   phone shell could -- flex-basis:0 meant this box grew into whatever was
+   left over, and on a short window that was less than the ENCRYPT button
+   and output needed, with .shell being overflow:hidden. */
 .cipher-area{flex:1 1 0%;display:flex;flex-direction:column;background:var(--win);min-height:0;overflow:hidden;}
 .cipher-head{
   background:var(--panel);border-bottom:1px solid var(--bd1);
@@ -739,43 +734,144 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
   margin-top:44px;
   background:#000;
 }
-/* Mobile: full-height shell as before */
-@media(max-width:600px){
-  .cipher-page-wrap{margin-top:44px;align-items:stretch;}
-  .shell{
-    height:calc(100vh - 44px) !important;
-    max-height:none !important;
-    max-width:none !important;
-    width:100% !important;
-    border-radius:0 !important;
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT MODES
+
+   Two of them, chosen by window size rather than by sniffing the user
+   agent. A UA string cannot be trusted and does not change when someone
+   resizes a window or rotates a tablet; a media query does, so a narrow
+   desktop window correctly gets the stacked layout and a large tablet in
+   landscape correctly gets the wide one.
+
+     < 1024px   stacked. One natural page scroll, collapsible panels.
+     >= 1024px  wide. Three columns inside a landscape rectangle.
+
+   Between them they cover every width, so the phone-shell rules earlier in
+   this file are only a base for both to build on. If you ever need
+   touch-specific behaviour rather than size-specific, the hooks are
+   (pointer: coarse) and (hover: none) — this file does not need them yet.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── STACKED: phones, tablets, narrow windows ──────────────────────────
+   The shell used to be a fixed-height box with overflow:hidden and two
+   independent inner scroll areas, which on a phone meant nested scrolling
+   and content that could be cut off entirely. Here it is just a tall
+   document that scrolls once, top to bottom, with the title bar and status
+   bar pinned. Nothing can be clipped because nothing is height-constrained. */
+@media (max-width: 1023px){
+  html,body{
+    display:block;height:auto;min-height:100%;
+    overflow-x:hidden;overflow-y:auto;
+    -webkit-text-size-adjust:100%;
   }
-}
-/* Short windows, and zoomed-in views (zoom shrinks the CSS viewport, so this
-   is also the WCAG 1.4.10 reflow case).
-
-   Above this height the leftover space is enough for the message box, the
-   ENCRYPT button and the output, so the layout is left exactly as it is and
-   the keys and full matrix stay visible without scrolling.
-
-   Below it there is not enough to go around, and .shell being overflow:hidden
-   meant the overflow was silently unreachable -- the collapsible panels
-   collapsed to nothing, then the output box was cut off, then ENCRYPT itself,
-   which left no way to run the cipher at all. Giving .cipher-area a content
-   floor turns that shortfall into negative free space, which .top-region
-   absorbs: it has a shrink factor of 100 and already scrolls, so KEYS and the
-   matrix stay reachable by scrolling while the controls keep their space.
-
-   Shrink order end to end: collapsible panels, then the keys/matrix region
-   down to its 58px floor, and the controls last. */
-@media (max-height: 840px){
-  .cipher-area{min-height:min-content;}
-}
-
-/* Desktop: phone shell centered with padding */
-@media(min-width:601px){
-  .cipher-page-wrap{padding:32px 20px;background:var(--void);}
-  .shell{
-    height:calc(100vh - 44px - 64px);
-    max-height:860px;
+  .cipher-page-wrap{
+    display:block;min-height:0;margin-top:44px;padding:0;background:var(--void);
   }
+  .shell{
+    aspect-ratio:auto;
+    width:100%;max-width:none;
+    height:auto;max-height:none;min-height:calc(100vh - 44px);
+    overflow:visible;
+    border-left:none;border-right:none;
+    animation:none;                 /* the flicker is distracting while scrolling */
+  }
+  .shell::after{position:fixed;}    /* scanlines stay put instead of scrolling */
+  /* No inner scroll containers: the page itself is the scroller. */
+  .top-region,.cipher-area,.cipher-body,.cipher-panels{
+    overflow:visible;min-height:0;flex:none;
+  }
+  .tbar{position:sticky;top:0;z-index:60;}
+  .sbar{position:sticky;bottom:0;z-index:60;}
+  .top-region{border-bottom:1px solid var(--bd1);}
 }
+
+/* ── WIDE: desktop and landscape tablets ───────────────────────────────
+   A landscape rectangle instead of a portrait phone, laid out left to
+   right as configure -> operate -> inspect:
+
+     col 1  KEYS and the 6x6 matrix      (what you set up)
+     col 2  message in, ENCRYPT, output  (what you do)
+     col 3  the analysis panels          (what you inspect)
+
+   .cipher-panels is nested inside .cipher-area in the markup, so rather
+   than restructure the HTML, .shell is a 2-column grid and .cipher-area is
+   itself a 2-column grid spanning the second one. That reads as three
+   columns and keeps .cipher-area's own box, which carries the window
+   background and the CYCLIC filter animation.
+
+   Every column scrolls independently and the middle row is minmax(0,1fr),
+   so a short window shortens the columns instead of cutting them off. */
+@media (min-width: 1024px){
+  .cipher-page-wrap{
+    display:flex;align-items:center;justify-content:center;
+    padding:24px 20px;background:var(--void);
+    min-height:calc(100vh - 44px);
+  }
+  .shell{
+    aspect-ratio:auto;
+    width:min(calc(100vw - 40px), 1280px);max-width:1280px;
+    height:min(calc(100vh - 44px - 48px), 920px);max-height:920px;
+    display:grid;
+    grid-template-columns:minmax(300px,360px) minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr) auto;
+  }
+  .tbar{grid-column:1 / -1;grid-row:1;}
+  .sbar{grid-column:1 / -1;grid-row:3;}
+
+  /* col 1 — configure */
+  .top-region{
+    grid-column:1;grid-row:2;
+    flex:none;min-height:0;overflow-y:auto;
+    border-right:1px solid var(--bd1);
+  }
+  /* The column is narrower than the old full-width row, so the three key
+     fields read better stacked than squeezed side by side. */
+  .keys-row{flex-direction:column;gap:9px;}
+
+  /* cols 2 and 3 — operate, inspect */
+  .cipher-area{
+    grid-column:2;grid-row:2;
+    flex:none;min-height:0;overflow:hidden;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(280px,400px);
+    grid-template-rows:auto minmax(0,1fr);
+  }
+  .cipher-head{grid-column:1 / -1;grid-row:1;}
+  .cipher-body{
+    grid-column:1;grid-row:2;
+    flex:none;min-height:0;overflow-y:auto;
+    padding:10px 12px;
+  }
+  .cipher-panels{
+    grid-column:2;grid-row:2;
+    flex:none;min-height:0;overflow-y:auto;
+    border-left:1px solid var(--bd1);
+  }
+
+  /* There is room to breathe here, so use it. The middle column would
+     otherwise be a small input floating at the top of a tall empty box, so
+     the message area takes the column's slack and the output grows with it.
+     Both are clamped so they stay sane on a short window and do not run away
+     on a very tall one. */
+  .sec{padding:10px 12px;}
+  .gtable td{padding:7px 2px;}
+  .cipher-body > div:first-of-type{
+    flex:1 1 auto;display:flex;flex-direction:column;min-height:0;
+  }
+  .cipher-body > div:first-of-type .scanbox{
+    flex:1 1 auto;min-height:clamp(120px, 22vh, 320px);display:flex;
+  }
+  .minp{height:100%;min-height:0;resize:none;}
+  .out-box{min-height:clamp(56px, 13vh, 150px);}
+
+  /* The keys column has vertical room, so let the matrix claim what is left
+     under the key fields instead of leaving a third of the column empty.
+     The shell is height-capped, so the cells cannot grow unreasonably. */
+  .top-region{display:flex;flex-direction:column;}
+  .top-region > .sec:last-child{
+    flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+    border-bottom:none;
+  }
+  .top-region > .sec:last-child .gtable{flex:1 1 auto;}
+}
+
