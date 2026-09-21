@@ -14,14 +14,14 @@
      from cipher.js and the QR library is vendored, so no external code can
      run in the document that holds your plaintext and keys.
      style-src still needs 'unsafe-inline' for the inline style= attributes
-     in the markup. Google Fonts is the only remaining external origin and
-     it can only serve CSS and font files, never script.
+     in the markup, but every origin is now 'self': the fonts are
+     self-hosted, so the page makes no external requests of any kind.
      img-src allows data: because the QR library feature-detects data-URI
      support with a small inline GIF.
      frame-ancestors is intentionally absent — it is ignored in a meta tag.
      If you serve this over a host you control, send these as real headers and
      add: frame-ancestors 'none'; X-Content-Type-Options: nosniff. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 
 <!-- PWA / iOS home screen -->
@@ -47,9 +47,12 @@
 <meta name="twitter:description" content="Terminal encryption tool. Three keys, six-by-six matrix, zero servers.">
 <meta name="twitter:image" content="icon-512.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<!-- Fonts are self-hosted (see fonts.css and fonts/LICENSE.txt). Preloaded
+     because both families are used above the fold on every page; the
+     crossorigin attribute is required on font preloads even same-origin. -->
+<link rel="preload" href="fonts/vt323-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/share-tech-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts.css">
 
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="cipher.css">

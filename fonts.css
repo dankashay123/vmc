@@ -1,0 +1,30 @@
+/* ═══════════════════════════════════════════════════════════════
+   Void Matrix — self-hosted web fonts.
+
+   These used to come from Google Fonts, which meant a request to a
+   third party on every page load of a tool that claims nothing leaves
+   your device. Serving them ourselves removes the app's last external
+   request and lets both style-src and font-src be 'self'.
+
+   latin subset, weight 400, woff2 only. Provenance, hashes and the
+   SIL Open Font License for both families are in fonts/LICENSE.txt.
+
+   font-display:swap is kept: the UI is legible in the fallback
+   monospace, so showing text immediately beats blocking on the font.
+   ═══════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'VT323';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/vt323-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/share-tech-mono-latin-400-normal.woff2') format('woff2');
+}
