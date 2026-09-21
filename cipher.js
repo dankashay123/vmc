@@ -336,15 +336,50 @@ function hslToHex(h,s,l){
   return`#${f(0)}${f(8)}${f(4)}`;
 }
 
+// ── Contrast-aware palette generation ────────────────────────────────────
+// WCAG relative luminance and contrast ratio, so the hue picker can target a
+// readability level instead of a lightness number.
+const SURFACE_DARKEST='#070a0d';   // --win, the darkest surface text sits on
+function relLum(hex){
+  const ch=[1,3,5].map(i=>{
+    const v=parseInt(hex.slice(i,i+2),16)/255;
+    return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);
+  });
+  return 0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2];
+}
+function contrast(a,b){
+  const la=relLum(a),lb=relLum(b);
+  return (Math.max(la,lb)+0.05)/(Math.min(la,lb)+0.05);
+}
+// Smallest lightness at the given hue and saturation that still clears the
+// target ratio against the darkest surface. Monotonic in lightness above
+// mid-grey, so a binary search is exact enough and keeps the colour as
+// saturated-looking as the target allows.
+function solveLightness(h,s,target){
+  let lo=25,hi=97,best=hslToHex(h,s,hi);
+  for(let i=0;i<22;i++){
+    const mid=(lo+hi)/2, hex=hslToHex(h,s,mid);
+    if(contrast(hex,SURFACE_DARKEST)>=target){ best=hex; hi=mid; } else { lo=mid; }
+  }
+  return best;
+}
+
 function applyHue(h){
   const r=document.documentElement.style;
-  const acc=hslToHex(h,100,44);
-  const t4=hslToHex(h,55,67);
-  const t3=hslToHex(h,42,54);
-  const t2=hslToHex(h,32,42);
-  const t1=hslToHex(h,25,28);
-  const t0=hslToHex(h,22,15);
-  const bd2=hslToHex(h,35,24);
+  // Each text level is solved for a target contrast ratio rather than given
+  // a fixed lightness. Hues differ enormously in intrinsic luminance -- pure
+  // red and pure blue are far darker than green at the same HSL lightness --
+  // so fixed values meant the palette was readable at green and failed WCAG
+  // at red, blue and magenta. Solving per hue holds every level at the same
+  // measured ratio whatever colour the user picks. Borders stay dark and are
+  // left on fixed lightness: they are chrome, never text.
+  const acc=solveLightness(h,100,4.6);
+  const t4=solveLightness(h,48,13.5);
+  const t3=solveLightness(h,40,11.0);
+  const t2=solveLightness(h,34,8.5);
+  const t1=solveLightness(h,30,6.5);
+  const t0=solveLightness(h,26,4.6);
+  const bd2=hslToHex(h,30,25);
   const bd1=hslToHex(h,28,16);
   const bd0=hslToHex(h,22,10);
   // parse acc to rgb for rgba vars
@@ -553,8 +588,8 @@ function calcCrack(gk,tk,ss){
     `<div class="lstep"><div class="lstep-h">GRID · P(36,${U}) from ${U} unique key chars</div><div class="lstep-c"><span class="hi">${fmtSci(gL)}</span></div></div>`+
     `<div class="lstep"><div class="lstep-h">TRANS · ${L}! column orders</div><div class="lstep-c"><span class="hi">${fmtSci(tL)}</span></div></div>`+
     `<div class="lstep"><div class="lstep-h">SHIFT · 6<sup>${N}</sup> effective sequences</div><div class="lstep-c"><span class="hi">${fmtSci(sL)}</span></div></div>`+
-    `<div class="lstep"><div class="lstep-h">COMBINED KEYSPACE</div><div class="lstep-c" style="font-size:10px;color:var(--t3)">${fmtSci(tot)}</div></div>`+
-    `<div style="padding:0 0 4px 5px;display:flex;align-items:center;gap:6px"><div style="flex:1;height:3px;background:var(--bd0)"><div style="height:100%;width:${bar}%;background:var(--acc);box-shadow:0 0 5px var(--acc);transition:width .4s"></div></div><span style="font-size:12px;letter-spacing:2px;font-family:'VT323',monospace" class="crack-tag ${rc}">${rating}</span></div>`+
+    `<div class="lstep"><div class="lstep-h">COMBINED KEYSPACE</div><div class="lstep-c" style="font-size:var(--fs-value);color:var(--t3)">${fmtSci(tot)}</div></div>`+
+    `<div style="padding:0 0 4px 5px;display:flex;align-items:center;gap:6px"><div style="flex:1;height:3px;background:var(--bd0)"><div style="height:100%;width:${bar}%;background:var(--acc);box-shadow:0 0 5px var(--acc);transition:width .4s"></div></div><span style="font-size:var(--fs-lg);letter-spacing:var(--ls-wider);font-family:'VT323',monospace" class="crack-tag ${rc}">${rating}</span></div>`+
     `<div class="crack-note">`+
       (dictHit?`<b>⚠ DICTIONARY KEY DETECTED.</b> A key taken from a word list is searchable in roughly 10<sup>4</sup> guesses regardless of the figure above. Use ROLL plus your own edits.<br><br>`:``)+
       `<b>Keyspace is not security.</b> This is a classical cipher: Polybius fractionation, columnar transposition and cyclic shift. That family yields to statistical analysis given enough traffic under one key, no brute force required. Treat the rating as key hygiene, not a strength guarantee.`+
@@ -736,7 +771,7 @@ function buildLog(isEnc,steps){
     const{tbl,ord,kw,rows:tr}=td;
     let tstr=kw.split('').join(' ')+'\n';
     for(let r=0;r<tr;r++)tstr+=kw.split('').map((_,c)=>tbl[c][r]!==undefined?tbl[c][r]:'·').join(' ')+(r<tr-1?'\n':'');
-    step('04 / TRANSPOSITION',`kw:${hi(kw)} order:${hi(ord.map(o=>o.c).join(''))}<br><pre style="font-size:8px;color:var(--t1);line-height:1.5;white-space:pre">${esc(tstr)}</pre>→ ${hi(trans.join(' '))}`);
+    step('04 / TRANSPOSITION',`kw:${hi(kw)} order:${hi(ord.map(o=>o.c).join(''))}<br><pre style="font-size:var(--fs-caption);color:var(--t2);line-height:1.6;white-space:pre">${esc(tstr)}</pre>→ ${hi(trans.join(' '))}`);
     step('05 / RECOMBINATION',rcmb.map(({r,c,l})=>`(${r},${c})=${hi(l)}`).join(' '));
   }else{
     const{m,trans,lin,n,sr,sc,rows,cols}=steps;
@@ -892,13 +927,13 @@ function showDossierModal(text){
     overlay.innerHTML=`
       <div style="background:var(--panel);border:1px solid var(--bd2);display:flex;flex-direction:column;width:92%;max-width:420px;max-height:82vh;box-shadow:0 0 40px rgba(0,200,50,0.08);">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--bd1);flex-shrink:0;">
-          <span style="font-size:10px;letter-spacing:3px;color:var(--t3);font-family:'VT323',monospace;">TRANSMISSION DOSSIER</span>
+          <span style="font-size:var(--fs-lg);letter-spacing:var(--ls-wider);color:var(--t3);font-family:'VT323',monospace;">TRANSMISSION DOSSIER</span>
           <div style="display:flex;gap:6px;">
-            <button data-act="dossier-copy" style="padding:2px 10px;font-family:'VT323',monospace;font-size:11px;letter-spacing:1px;background:transparent;border:1px solid var(--bd1);color:var(--t1);cursor:pointer;" id="dossierCopyBtn">COPY</button>
-            <button data-act="dossier-close" style="padding:2px 10px;font-family:'VT323',monospace;font-size:11px;letter-spacing:1px;background:transparent;border:1px solid var(--bd1);color:var(--t1);cursor:pointer;">✕</button>
+            <button data-act="dossier-copy" style="padding:2px 10px;font-family:'VT323',monospace;font-size:var(--fs-body);letter-spacing:var(--ls-normal);background:transparent;border:1px solid var(--bd1);color:var(--t1);cursor:pointer;" id="dossierCopyBtn">COPY</button>
+            <button data-act="dossier-close" style="padding:2px 10px;font-family:'VT323',monospace;font-size:var(--fs-body);letter-spacing:var(--ls-normal);background:transparent;border:1px solid var(--bd1);color:var(--t1);cursor:pointer;">✕</button>
           </div>
         </div>
-        <pre id="dossierText" style="flex:1;overflow-y:auto;padding:10px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--t2);letter-spacing:1px;line-height:1.7;white-space:pre;overflow-x:auto;-webkit-overflow-scrolling:touch;"></pre>
+        <pre id="dossierText" style="flex:1;overflow-y:auto;padding:10px;font-family:'Share Tech Mono',monospace;font-size:var(--fs-caption);color:var(--t2);letter-spacing:var(--ls-normal);line-height:1.7;white-space:pre;overflow-x:auto;-webkit-overflow-scrolling:touch;"></pre>
       </div>`;
     document.body.appendChild(overlay);
     overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.style.display='none';});
@@ -1264,7 +1299,7 @@ function go(){
     b.dataset.val=out;
     b.innerHTML=`<span class="otext">${esc(out)}</span><button class="out-copy" id="cpyBtn" data-act="copy">COPY</button>`;
     if(wrongKeyWarning){
-      b.innerHTML+=`<div style="font-size:7px;color:var(--away);letter-spacing:1px;font-family:'Share Tech Mono',monospace;margin-top:4px">⚠ NO VOWELS DETECTED - KEYS MAY BE WRONG</div>`;
+      b.innerHTML+=`<div style="font-size:var(--fs-caption);color:var(--away);letter-spacing:var(--ls-normal);font-family:'Share Tech Mono',monospace;margin-top:5px">⚠ NO VOWELS DETECTED - KEYS MAY BE WRONG</div>`;
     }
 
     // ── Auto-verify (encrypt only) ──

@@ -1,16 +1,60 @@
 /* ═══════════════════════════════════════════════════════════════
    Void Matrix — design tokens.
 
-   The palette used to be copy-pasted into both style.css and the
-   inline <style> in cipher.html, so the two could silently drift.
-   It now lives here only. applyHue() overwrites these same custom
-   properties at runtime, which is why there must be exactly one
-   declaration site.
+   Declared once here; every page links this ahead of its own
+   stylesheet. applyHue() rewrites the same custom properties at
+   runtime, which is why there must be exactly one declaration site.
    ═══════════════════════════════════════════════════════════════ */
+
 :root{
+  /* ── Surfaces ──────────────────────────────────────────────── */
   --void:#010103;--panel:#050709;--win:#070a0d;
-  --bd0:#0b140b;--bd1:#142614;--bd2:#1f3d1f;
-  --t0:#162216;--t1:#264a26;--t2:#3d703d;--t3:#6aaa6a;--t4:#8acc8a;
+
+  /* ── Borders and rules. Chrome only, never text. ───────────── */
+  --bd0:#0b140b;--bd1:#1c351c;--bd2:#2d552d;
+
+  /* ── Text ramp, t0 dimmest to t4 brightest.
+     Every step is a measured WCAG contrast ratio against --win
+     #070a0d, the darkest surface any of them sits on, so all five
+     pass AA (4.5:1) as body text and t2 up pass AAA (7:1):
+
+       t0  #4e865c   4.6:1  placeholders, the dimmest readable text
+       t1  #58a36b   6.5:1  field labels, captions, counters
+       t2  #72b984   8.5:1  secondary values, body copy
+       t3  #90cfa0  11.0:1  primary text, section headings
+       t4  #abe2b9  13.5:1  brightest text, key values
+
+     The previous ramp bottomed out at 1.2:1 for t0 and 2.0:1 for
+     t1 -- effectively invisible -- and those two carried nearly
+     every label in the interface. ─────────────────────────────── */
+  --t0:#4e865c;--t1:#58a36b;--t2:#72b984;--t3:#90cfa0;--t4:#abe2b9;
+
+  /* ── Accent and status. Also checked as body text. ─────────── */
   --acc:#00e044;--accg:rgba(0,220,68,0.11);--accg2:rgba(0,220,68,0.22);
-  --dim-r:#b02200;--away:#cc8800;
+  --away:#c68708;   /*  6.5:1  warnings  */
+  --dim-r:#f4482e;  /*  5.5:1  errors    */
+
+  /* ── Type scale ────────────────────────────────────────────────
+     The interface used to run on 7px and 8px text -- 53 separate
+     declarations of it -- which is below the point most people can
+     read comfortably regardless of contrast. Nothing is under 11px
+     now. Tune the whole interface from here; the steps are
+     referenced by name throughout rather than as literals.
+
+     Both layout modes scroll (the page on narrow windows, each
+     column on wide ones), so larger type costs nothing but space
+     that is already scrollable. ──────────────────────────────── */
+  --fs-micro:11px;    /* counters, hints, the status bar        */
+  --fs-caption:12px;  /* captions, panel previews, fine print   */
+  --fs-label:13px;    /* field labels, panel headers            */
+  --fs-head:14px;     /* section headings, small buttons        */
+  --fs-body:15px;     /* buttons, default body text             */
+  --fs-value:16px;    /* inputs, matrix cells, key values       */
+  --fs-lg:18px;       /* ciphertext output, title bar           */
+  --fs-xl:20px;       /* the ENCRYPT button                     */
+  --fs-display:24px;  /* page-level display text                */
+
+  /* ── Tracking. Wide tracking on small text hurts word shape,
+     so nothing exceeds 2px any more. ────────────────────────── */
+  --ls-tight:0.5px;--ls-normal:1px;--ls-wide:1.5px;--ls-wider:2px;
 }

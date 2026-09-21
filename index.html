@@ -53,7 +53,7 @@
 .corner-br{bottom:20px;right:20px;border-width:0 1px 1px 0;}
 .hero-content{position:relative;z-index:1;max-width:720px;}
 .hero-eyebrow{
-  font-size:8px;letter-spacing:6px;color:var(--t1);margin-bottom:20px;
+  font-size:var(--fs-caption);letter-spacing:6px;color:var(--t1);margin-bottom:20px;
   display:flex;align-items:center;gap:10px;
   opacity:0;animation:fade-up .6s ease .2s forwards;
 }
@@ -67,11 +67,11 @@
 .hero-title .acc{color:var(--acc);text-shadow:0 0 40px rgba(0,224,68,0.4),0 0 80px rgba(0,224,68,0.15);}
 .hero-sub{
   font-family:'VT323',monospace;font-size:clamp(16px,2.5vw,24px);
-  letter-spacing:5px;color:var(--t1);margin-bottom:36px;
+  letter-spacing:var(--ls-wider);color:var(--t1);margin-bottom:36px;
   opacity:0;animation:fade-up .6s ease .5s forwards;
 }
 .hero-desc{
-  font-size:11px;color:var(--t2);letter-spacing:1px;line-height:2.2;
+  font-size:var(--fs-body);color:var(--t2);letter-spacing:var(--ls-normal);line-height:2.2;
   max-width:480px;margin-bottom:44px;
   border-left:1px solid var(--bd2);padding-left:16px;
   opacity:0;animation:fade-up .6s ease .7s forwards;
@@ -85,8 +85,8 @@
   opacity:0;animation:fade-up .6s ease 1.1s forwards;
 }
 .hero-stat{border-left:1px solid var(--bd1);padding-left:16px;}
-.hero-stat-num{font-family:'VT323',monospace;font-size:36px;letter-spacing:2px;color:var(--acc);text-shadow:0 0 12px var(--accg);}
-.hero-stat-lbl{font-size:7px;letter-spacing:3px;color:var(--t1);margin-top:2px;}
+.hero-stat-num{font-family:'VT323',monospace;font-size:36px;letter-spacing:var(--ls-wider);color:var(--acc);text-shadow:0 0 12px var(--accg);}
+.hero-stat-lbl{font-size:var(--fs-micro);letter-spacing:var(--ls-wider);color:var(--t1);margin-top:2px;}
 @keyframes fade-up{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 
 /* ── LIVE DEMO ───────────────────────────────── */
@@ -98,30 +98,30 @@
 @media(max-width:600px){.demo-section{padding:40px 20px;}}
 .demo-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
 @media(max-width:650px){.demo-inner{grid-template-columns:1fr;gap:28px;}}
-.demo-text h2{font-family:'VT323',monospace;font-size:clamp(28px,3vw,44px);letter-spacing:3px;color:var(--t3);margin-bottom:14px;}
-.demo-text p{font-size:10px;color:var(--t1);letter-spacing:1px;line-height:2.1;margin-bottom:24px;}
+.demo-text h2{font-family:'VT323',monospace;font-size:clamp(28px,3vw,44px);letter-spacing:var(--ls-wider);color:var(--t3);margin-bottom:14px;}
+.demo-text p{font-size:var(--fs-head);color:var(--t1);letter-spacing:var(--ls-normal);line-height:2.1;margin-bottom:24px;}
 .demo-box{background:var(--win);border:1px solid var(--bd1);padding:20px;position:relative;}
 .demo-box::before{
   content:'// LIVE DEMO';position:absolute;top:-9px;left:12px;
-  font-size:7px;letter-spacing:2px;color:var(--t1);
+  font-size:var(--fs-micro);letter-spacing:var(--ls-wider);color:var(--t1);
   background:var(--panel);padding:0 6px;
 }
-.demo-input-lbl,.demo-output-lbl{font-size:7px;letter-spacing:3px;color:var(--t1);margin-bottom:6px;}
+.demo-input-lbl,.demo-output-lbl{font-size:var(--fs-micro);letter-spacing:var(--ls-wider);color:var(--t1);margin-bottom:6px;}
 .demo-input{
   width:100%;background:#030508;border:1px solid var(--bd0);border-bottom-color:var(--bd1);
-  color:var(--t4);font-family:'Share Tech Mono',monospace;font-size:14px;
-  padding:8px;outline:none;letter-spacing:2px;transition:border-color .18s;
+  color:var(--t4);font-family:'Share Tech Mono',monospace;font-size:var(--fs-head);
+  padding:8px;outline:none;letter-spacing:var(--ls-wider);transition:border-color .18s;
 }
 .demo-input:focus{border-color:var(--bd2);}
 .demo-divider{height:1px;background:var(--bd0);margin:14px 0;}
 .demo-output{
-  font-family:'Share Tech Mono',monospace;font-size:13px;
-  color:var(--acc);letter-spacing:2px;min-height:28px;
+  font-family:'Share Tech Mono',monospace;font-size:var(--fs-lg);
+  color:var(--acc);letter-spacing:var(--ls-wider);min-height:28px;
   word-break:break-all;line-height:1.8;text-shadow:0 0 8px rgba(0,224,68,0.4);
 }
-.demo-output.empty{color:var(--t0);font-size:9px;letter-spacing:1px;font-style:italic;text-shadow:none;}
+.demo-output.empty{color:var(--t0);font-size:var(--fs-label);letter-spacing:var(--ls-normal);font-style:italic;text-shadow:none;}
 .demo-keys{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
-.demo-key-chip{font-size:7px;letter-spacing:2px;color:var(--t1);border:1px solid var(--bd0);padding:2px 7px;background:var(--panel);}
+.demo-key-chip{font-size:var(--fs-micro);letter-spacing:var(--ls-wider);color:var(--t1);border:1px solid var(--bd0);padding:2px 7px;background:var(--panel);}
 .demo-key-chip span{color:var(--t2);}
 
 /* ── FEATURES ────────────────────────────────── */
@@ -139,8 +139,8 @@
   margin-bottom:12px;text-shadow:0 0 8px var(--accg);transition:text-shadow .2s;
 }
 .feature:hover .feature-icon{text-shadow:0 0 16px var(--accg),0 0 32px var(--accg);}
-.feature-title{font-family:'VT323',monospace;font-size:18px;letter-spacing:2px;color:var(--t3);margin-bottom:8px;}
-.feature-body{font-size:9px;color:var(--t1);letter-spacing:1px;line-height:2.1;}
+.feature-title{font-family:'VT323',monospace;font-size:var(--fs-display);letter-spacing:var(--ls-wider);color:var(--t3);margin-bottom:8px;}
+.feature-body{font-size:var(--fs-label);color:var(--t1);letter-spacing:var(--ls-normal);line-height:2.1;}
 
 /* ── CTA ─────────────────────────────────────── */
 .cta-section{
@@ -152,8 +152,8 @@
   background:radial-gradient(ellipse 60% 60% at 50% 50%,var(--accg),transparent);
   pointer-events:none;
 }
-.cta-section h2{font-family:'VT323',monospace;font-size:clamp(32px,5vw,60px);letter-spacing:4px;color:var(--t3);margin-bottom:16px;position:relative;}
-.cta-section p{font-size:10px;color:var(--t1);letter-spacing:1px;margin-bottom:36px;position:relative;}
+.cta-section h2{font-family:'VT323',monospace;font-size:clamp(32px,5vw,60px);letter-spacing:var(--ls-wider);color:var(--t3);margin-bottom:16px;position:relative;}
+.cta-section p{font-size:var(--fs-head);color:var(--t1);letter-spacing:var(--ls-normal);margin-bottom:36px;position:relative;}
 .cta-section .btn{position:relative;font-size:20px;padding:12px 52px;}
 </style>
 </head>
@@ -202,7 +202,7 @@
     <div class="demo-text reveal">
       <h2>TRY IT NOW</h2>
       <p>Type anything below and watch it encrypt in real time. Every character routes through the 6×6 matrix, gets shifted, transposed, and recombined into ciphertext.</p>
-      <a href="cipher.html" class="btn btn-ghost" style="font-size:13px;padding:6px 20px;">OPEN FULL CIPHER ▸</a>
+      <a href="cipher.html" class="btn btn-ghost" style="font-size:var(--fs-lg);padding:6px 20px;">OPEN FULL CIPHER ▸</a>
     </div>
     <div class="demo-box reveal reveal-delay-2">
       <div class="demo-input-lbl">PLAINTEXT</div>
