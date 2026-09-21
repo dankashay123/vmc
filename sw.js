@@ -7,7 +7,11 @@
 // Bump BUILD on every deploy. That is the only required step.
 // ═══════════════════════════════════════════════════════════════
 
-const BUILD = '3.1.0';
+// The build number lives in version.js so the cache key, the on-screen
+// version stamp and the dossier header cannot drift apart. Bumping that one
+// line is the whole deploy ritual.
+importScripts('./version.js');
+const BUILD = self.VMC_BUILD;
 const CACHE = `vmc-${BUILD}`;
 
 // App shell. Local assets are required; CDN assets are best-effort.
@@ -17,8 +21,13 @@ const LOCAL_ASSETS = [
   './cipher.html',
   './how-it-works.html',
   './about.html',
+  './tokens.css',
   './style.css',
+  './cipher.css',
+  './version.js',
   './site.js',
+  './hero-rain.js',
+  './cipher.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -37,7 +46,15 @@ const REMOTE_ASSETS = [
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    await Promise.allSettled(LOCAL_ASSETS.map(u => cache.add(u)));
+    // Local assets are required, so report the ones that did not make it.
+    // allSettled used to swallow these silently, which is how the app
+    // shipped for several builds referencing two icons that did not exist.
+    const local = await Promise.allSettled(LOCAL_ASSETS.map(u => cache.add(u)));
+    const missing = LOCAL_ASSETS.filter((u, i) => local[i].status === 'rejected');
+    if (missing.length) {
+      console.error('[vmc sw] precache failed for required assets:', missing);
+    }
+    // Remote assets stay best-effort: no network on first load is normal.
     await Promise.allSettled(REMOTE_ASSETS.map(u => cache.add(u)));
   })());
 });

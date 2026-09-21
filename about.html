@@ -6,6 +6,16 @@
 <title>About — Void Matrix</title>
 <meta name="description" content="About Void Matrix — a terminal cipher tool built for personal use.">
 <meta name="theme-color" content="#010103">
+<!-- Content-Security-Policy.
+     script-src is 'self' with no inline scripts and no third-party origins.
+     style-src needs 'unsafe-inline' for the page's inline style= attributes
+     and <style> blocks. frame-ancestors is intentionally absent: it is
+     ignored in a meta tag. If you serve this from a host you control, send
+     these as real headers and add frame-ancestors 'none' plus
+     X-Content-Type-Options: nosniff. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+
 <meta property="og:site_name" content="Void Matrix">
 <meta property="og:title" content="About — Void Matrix">
 <meta property="og:description" content="A personal encryption tool. Classical cipher architecture, terminal aesthetic, no servers.">
@@ -21,6 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="style.css">
 <style>
 .about-lead{
@@ -172,6 +183,7 @@
   </div>
 </footer>
 
+<script src="version.js" defer></script>
 <script src="site.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,16 @@
+/* ═══════════════════════════════════════════════════════════════
+   Void Matrix — design tokens.
+
+   The palette used to be copy-pasted into both style.css and the
+   inline <style> in cipher.html, so the two could silently drift.
+   It now lives here only. applyHue() overwrites these same custom
+   properties at runtime, which is why there must be exactly one
+   declaration site.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --void:#010103;--panel:#050709;--win:#070a0d;
+  --bd0:#0b140b;--bd1:#142614;--bd2:#1f3d1f;
+  --t0:#162216;--t1:#264a26;--t2:#3d703d;--t3:#6aaa6a;--t4:#8acc8a;
+  --acc:#00e044;--accg:rgba(0,220,68,0.11);--accg2:rgba(0,220,68,0.22);
+  --dim-r:#b02200;--away:#cc8800;
+}

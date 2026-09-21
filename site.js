@@ -5,7 +5,9 @@
 (function () {
   'use strict';
 
-  var VERSION = 'v3.1';
+  // Version comes from version.js (loaded ahead of this file) so the page
+  // stamp and the service worker cache key cannot drift apart.
+  var VERSION = (self.VMC_VERSION_LABEL || 'v?');
 
   // matchMedia is universal in browsers but absent in some embedded webviews
   // and test runners. Failing closed here would take the whole file down.
