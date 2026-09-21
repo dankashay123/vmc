@@ -995,19 +995,16 @@ function togFreq(){
 
 
 // ── QR library, loaded on demand ─────────────────────────────────────────
-// This is third-party code from a CDN, and it used to sit in the page from
-// first paint with full access to the plaintext and key fields. It is now
-// fetched only once you ask for a QR — i.e. after you have already decided
-// to put those keys into a scannable image. The service worker still
-// precaches it, so offline use is unaffected after the first load.
+// Vendored (see the banner in qrcode.min.js). It was previously pulled from
+// cdnjs at runtime, which put un-pinned third-party code in the same
+// document as the plaintext and the key fields. Now it is same-origin, so
+// script-src is 'self' with no exceptions and the QR works on a cold
+// offline start rather than depending on a best-effort cache entry.
 //
-// TODO: vendor this locally to close the gap completely. It cannot be
-// pinned with subresource integrity while it is fetched no-cors from a
-// third party. To finish the job:
-//   curl -o qrcode.min.js https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js
-// then point QR_SRC at './qrcode.min.js', add it to LOCAL_ASSETS in sw.js,
-// and drop cdnjs from the script-src in every page's CSP.
-const QR_SRC='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+// Still loaded on demand rather than with a <script> tag in the head: it is
+// 20KB that most sessions never need, and there is no reason to parse it on
+// every page load. The service worker precaches it either way.
+const QR_SRC='./qrcode.min.js';
 let qrLibPromise=null;
 function loadQRLib(){
   if(typeof QRCode!=='undefined') return Promise.resolve();
@@ -1016,8 +1013,6 @@ function loadQRLib(){
     const sc=document.createElement('script');
     sc.src=QR_SRC;
     sc.async=true;
-    // No crossOrigin: the service worker precaches this opaquely, and a
-    // CORS-mode request would not be servable from that cached response.
     sc.onload=()=>{
       if(typeof QRCode==='undefined'){qrLibPromise=null;reject(Error('qr lib loaded but absent'));}
       else resolve();
@@ -1059,7 +1054,7 @@ function showQR(){
     errEl.textContent='';
     renderQR(blob);
   }).catch(()=>{
-    errEl.textContent='✗ QR ENCODER UNAVAILABLE — offline and not yet cached. Use SHARE instead.';
+    errEl.textContent='✗ QR ENCODER FAILED TO LOAD — use SHARE instead.';
     errEl.style.display='block';
     canvas.style.display='none';
   });

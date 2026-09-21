@@ -9,15 +9,19 @@
 <title>Cipher — Void Matrix</title>
 
 <!-- Content-Security-Policy.
-     script-src is 'self' plus the one CDN origin the QR library comes from.
-     There is no inline script left on this page at all: every handler is
-     delegated from cipher.js, which is what makes a script-src this tight
-     possible. style-src still needs 'unsafe-inline' because the markup uses
-     inline style= attributes in a number of places.
+     script-src is 'self' with no exceptions: there is no inline script on
+     this page and no third-party script origin. Every handler is delegated
+     from cipher.js and the QR library is vendored, so no external code can
+     run in the document that holds your plaintext and keys.
+     style-src still needs 'unsafe-inline' for the inline style= attributes
+     in the markup. Google Fonts is the only remaining external origin and
+     it can only serve CSS and font files, never script.
+     img-src allows data: because the QR library feature-detects data-URI
+     support with a small inline GIF.
      frame-ancestors is intentionally absent — it is ignored in a meta tag.
      If you serve this over a host you control, send these as real headers and
      add: frame-ancestors 'none'; X-Content-Type-Options: nosniff. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 
 <!-- PWA / iOS home screen -->

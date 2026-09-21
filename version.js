@@ -7,7 +7,7 @@
    this one line is the whole deploy ritual.
    ═══════════════════════════════════════════════════════════════ */
 (function (root) {
-  root.VMC_BUILD = '3.2.0';
+  root.VMC_BUILD = '3.3.0';
   // Display form: major.minor only, e.g. "v3.2".
   root.VMC_VERSION_LABEL = 'v' + root.VMC_BUILD.replace(/\.\d+$/, '');
 })(typeof self !== 'undefined' ? self : this);

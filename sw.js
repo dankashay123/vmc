@@ -3,7 +3,7 @@
 // Strategy:
 //   navigations      → network-first (so updates always land)
 //   same-origin      → stale-while-revalidate
-//   cross-origin CDN → cache-first, refreshed in background
+//   cross-origin fonts → cache-first, refreshed in background
 // Bump BUILD on every deploy. That is the only required step.
 // ═══════════════════════════════════════════════════════════════
 
@@ -28,15 +28,17 @@ const LOCAL_ASSETS = [
   './site.js',
   './hero-rain.js',
   './cipher.js',
+  './qrcode.min.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png'
 ];
 
+// Fonts only. The QR library used to live here; it is vendored now, so it
+// is a required local asset and no longer best-effort.
 const REMOTE_ASSETS = [
-  'https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
+  'https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap'
 ];
 
 // ── INSTALL ────────────────────────────────────────────────────
@@ -118,7 +120,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cross-origin (fonts, QR lib): cache first, refresh quietly.
+  // Cross-origin (fonts only): cache first, refresh quietly.
   e.respondWith((async () => {
     const cached = await caches.match(req);
     if (cached) {
